@@ -2,18 +2,26 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '7.2.1'
 }
 
 group = 'com.lh'
 version = '0.0.1-SNAPSHOT'
-description = 'Project for ecormmerce'
+description = 'Project for ecommerce'
 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(24)
 	}
 }
-
+tasks.compileJava {
+	dependsOn 'spotlessApply'
+}
+spotless {
+	java {
+		googleJavaFormat()
+	}
+}
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -25,7 +33,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.liquibase:liquibase-core'

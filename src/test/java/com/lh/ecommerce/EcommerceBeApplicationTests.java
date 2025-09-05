@@ -1,13 +1,11 @@
-package com.lh.ecormmerce;
+package com.lh.ecommerce;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EcormmerceBeApplicationTests {
+class EcommerceBeApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+  @Test
+  void contextLoads() {}
 }
