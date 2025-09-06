@@ -1,13 +1,14 @@
 package com.lh.ecommerce.dto.response;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Setter
 @Getter
-public class TokenResponse {
-  private String accessToken;
+public class RenewRequest {
   private String refreshToken;
 }

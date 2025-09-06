@@ -16,12 +16,16 @@ import org.springframework.stereotype.Component;
 public class JwtTokenHelper {
   private static final String CLAIM_TOKEN_TYPE = "tokenType";
   private static final String TOKEN_TYPE_ACCESS = "access";
+  private static final String TOKEN_TYPE_REFRESH = "refresh";
 
   @Value("${spring.security.secret-key}")
   private String secretKey;
 
   @Value("${spring.security.access-minutes}")
   private int accessMinutes;
+
+  @Value("${spring.security.refresh-minutes}")
+  private int refreshMinutes;
 
   private SecretKey getSignInKey() {
     return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -34,6 +38,17 @@ public class JwtTokenHelper {
         .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_ACCESS)
         .issuedAt(new Date(System.currentTimeMillis()))
         .expiration(DateUtils.getTime(accessMinutes))
+        .signWith(getSignInKey())
+        .compact();
+  }
+
+  public String generateRefreshToken(String username, UUID jti) {
+    return Jwts.builder()
+        .subject(username)
+        .id(jti.toString())
+        .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_REFRESH)
+        .issuedAt(new Date(System.currentTimeMillis()))
+        .expiration(DateUtils.getTime(refreshMinutes))
         .signWith(getSignInKey())
         .compact();
   }

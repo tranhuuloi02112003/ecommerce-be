@@ -24,6 +24,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   private final JwtTokenHelper jwtTokenHelper;
   private final RedisRepository redisRepository;
   private static final String BEARER_PREFIX = "Bearer ";
+  private static final String TOKEN_TYPE_ACCESS = "access";
 
   @Override
   protected void doFilterInternal(
@@ -35,7 +36,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     String token = bearerToken.substring(BEARER_PREFIX.length());
+
+    String tokenType = jwtTokenHelper.extractTokenType(token);
+    if (!TOKEN_TYPE_ACCESS.equals(tokenType)) {
+      throw new BadCredentialsException("Invalid token");
+    }
+
     String jti = jwtTokenHelper.extractJti(token);
+
     if (redisRepository.isAccessJtiBlacklisted(jti)) {
       throw new BadCredentialsException("Token is logged out");
     }

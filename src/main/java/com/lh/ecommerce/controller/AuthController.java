@@ -1,5 +1,6 @@
 package com.lh.ecommerce.controller;
 
+import com.lh.ecommerce.dto.response.RenewRequest;
 import com.lh.ecommerce.dto.response.TokenResponse;
 import com.lh.ecommerce.dto.resquest.LoginRequest;
 import com.lh.ecommerce.service.AuthService;
@@ -23,5 +24,10 @@ public class AuthController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
     authService.logout(authorization);
+  }
+
+  @PostMapping("/renew-token")
+  public TokenResponse renewToken(@RequestBody RenewRequest renewRequest) {
+    return authService.renew(renewRequest);
   }
 }
