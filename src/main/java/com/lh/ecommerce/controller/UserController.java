@@ -1,6 +1,6 @@
 package com.lh.ecommerce.controller;
 
-import com.lh.ecommerce.entity.UserEntity;
+import com.lh.ecommerce.dto.response.User;
 import com.lh.ecommerce.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ public class UserController {
   private final UserService userService;
 
   @GetMapping()
-  public List<UserEntity> getAllUser() {
+  public List<User> getAllUser() {
     return userService.getAllUser();
   }
 }
