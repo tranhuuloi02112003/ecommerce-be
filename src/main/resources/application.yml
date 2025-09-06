@@ -1,1 +1,10 @@
-spring.application.name=ecommerce-be
+spring:
+  application:
+    name: ecommerce-be
+  datasource:
+    url: jdbc:postgresql://localhost:5433/${DB_NAME:ecommerce}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:r00t}
+  liquibase:
+    change-log: classpath:db/changelog/db-changelog.xml
+    enabled: true
