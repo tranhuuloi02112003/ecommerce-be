@@ -2,6 +2,7 @@ package com.lh.ecommerce.security.jwt;
 
 import com.lh.ecommerce.entity.UserEntity;
 import com.lh.ecommerce.repository.redis.RedisRepository;
+import com.lh.ecommerce.security.SecurityError;
 import com.lh.ecommerce.security.user.CustomUserPrincipal;
 import com.lh.ecommerce.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -11,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -39,13 +39,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     String tokenType = jwtTokenHelper.extractTokenType(token);
     if (!TOKEN_TYPE_ACCESS.equals(tokenType)) {
-      throw new BadCredentialsException("Invalid token");
+      throw SecurityError.invalidToken().get();
     }
 
     String jti = jwtTokenHelper.extractJti(token);
 
     if (redisRepository.isAccessJtiBlacklisted(jti)) {
-      throw new BadCredentialsException("Token is logged out");
+      throw SecurityError.invalidToken().get();
     }
     String username = jwtTokenHelper.extractUsername(token);
     if (username != null) {

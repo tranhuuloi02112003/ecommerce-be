@@ -16,8 +16,9 @@ public class UserService {
   private final UserMapper userMapper;
 
   public List<User> getAllUser() {
-    List<UserEntity> userEntities = userRepository.findAll();
-    return userMapper.toDtoList(userEntities);
+    throw UserError.userNotFound().get();
+    //    List<UserEntity> userEntities = userRepository.findAll();
+    //    return userMapper.toDtoList(userEntities);
   }
 
   public UserEntity getUserByUsername(String username) {
