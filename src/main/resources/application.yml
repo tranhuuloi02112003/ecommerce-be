@@ -8,3 +8,15 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db-changelog.xml
     enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6380
