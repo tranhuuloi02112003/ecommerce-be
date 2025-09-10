@@ -1,6 +1,6 @@
-package com.lh.ecommerce.service;
+package com.lh.ecommerce.service.auth;
 
-import com.lh.ecommerce.dto.response.RenewRequest;
+import com.lh.ecommerce.dto.response.RefreshRequest;
 import com.lh.ecommerce.dto.response.TokenResponse;
 import com.lh.ecommerce.dto.resquest.LoginRequest;
 
@@ -9,5 +9,5 @@ public interface AuthService {
 
   void logout(String bearerToken);
 
-  TokenResponse renew(RenewRequest request);
+  TokenResponse refresh(RefreshRequest request);
 }

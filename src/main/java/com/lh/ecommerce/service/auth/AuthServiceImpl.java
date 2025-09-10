@@ -1,12 +1,13 @@
-package com.lh.ecommerce.service;
+package com.lh.ecommerce.service.auth;
 
-import com.lh.ecommerce.dto.response.RenewRequest;
+import com.lh.ecommerce.dto.response.RefreshRequest;
 import com.lh.ecommerce.dto.response.Session;
 import com.lh.ecommerce.dto.response.TokenResponse;
 import com.lh.ecommerce.dto.resquest.LoginRequest;
 import com.lh.ecommerce.entity.UserEntity;
 import com.lh.ecommerce.repository.redis.RedisRepository;
 import com.lh.ecommerce.security.jwt.JwtTokenHelper;
+import com.lh.ecommerce.service.user.UserService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
@@ -20,12 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+  private static final String BEARER_PREFIX = "Bearer ";
+  private static final String TOKEN_TYPE_REFRESH = "refresh";
+
   private final AuthenticationManager authenticationManager;
   private final JwtTokenHelper jwtTokenHelper;
   private final RedisRepository redisRepository;
   private final UserService userService;
-  private static final String BEARER_PREFIX = "Bearer ";
-  private static final String TOKEN_TYPE_REFRESH = "refresh";
 
   @Override
   public TokenResponse login(LoginRequest request) {
@@ -45,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
             .userId(user.getId())
             .username(user.getUsername())
             .build();
+
     redisRepository.saveSession(session);
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
@@ -69,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   @Transactional
-  public TokenResponse renew(RenewRequest request) {
+  public TokenResponse refresh(RefreshRequest request) {
     String refresh = request.getRefreshToken();
     if (refresh == null || refresh.isBlank()) {
       throw new BadCredentialsException("Refresh token is missing");
