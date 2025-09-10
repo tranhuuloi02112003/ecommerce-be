@@ -1,9 +1,9 @@
 package com.lh.ecommerce.controller;
 
-import com.lh.ecommerce.dto.response.RenewRequest;
+import com.lh.ecommerce.dto.response.RefreshRequest;
 import com.lh.ecommerce.dto.response.TokenResponse;
 import com.lh.ecommerce.dto.resquest.LoginRequest;
-import com.lh.ecommerce.service.AuthService;
+import com.lh.ecommerce.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
   private final AuthService authService;
 
-  @PostMapping("/login")
+  @PostMapping("/token")
   public TokenResponse login(@RequestBody LoginRequest loginRequest) {
     return authService.login(loginRequest);
   }
@@ -26,8 +26,8 @@ public class AuthController {
     authService.logout(authorization);
   }
 
-  @PostMapping("/renew-token")
-  public TokenResponse renewToken(@RequestBody RenewRequest renewRequest) {
-    return authService.renew(renewRequest);
+  @PostMapping("/refresh-token")
+  public TokenResponse refreshToken(@RequestBody RefreshRequest renewRequest) {
+    return authService.refresh(renewRequest);
   }
 }
