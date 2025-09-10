@@ -33,4 +33,15 @@ public class UserEntity {
 
   @Column(name = "updated_by")
   private UUID updatedBy;
+
+  @PrePersist
+  public void prePersist() {
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
+  }
+
+  @PreUpdate
+  public void preUpdate() {
+    this.updatedAt = Instant.now();
+  }
 }
