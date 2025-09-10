@@ -18,6 +18,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+  private static final String[] WHITE_LIST = {
+    "/api/auth/token", "/api/auth/logout", "/api/auth/refresh-token"
+  };
 
   @Autowired private JwtAuthFilter authFilter;
 
@@ -25,8 +28,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers("/api/auth/token").permitAll().anyRequest().authenticated())
+            auth -> auth.requestMatchers(WHITE_LIST).permitAll().anyRequest().authenticated())
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(Customizer.withDefaults())
         .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)

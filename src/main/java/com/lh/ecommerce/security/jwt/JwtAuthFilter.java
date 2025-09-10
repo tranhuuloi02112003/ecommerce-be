@@ -20,10 +20,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-    private static final String BEARER_PREFIX = "Bearer ";
+  private static final String BEARER_PREFIX = "Bearer ";
+  private static final String TOKEN_TYPE_ACCESS = "access";
 
-    private final UserService userService;
-    private final JwtTokenHelper jwtTokenHelper;
+  private final UserService userService;
+  private final JwtTokenHelper jwtTokenHelper;
   private final RedisRepository redisRepository;
 
   @Override
@@ -36,11 +37,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     String token = bearerToken.replace(BEARER_PREFIX, "");
+    String tokenType = jwtTokenHelper.extractTokenType(token);
+
+    if (!TOKEN_TYPE_ACCESS.equals(tokenType)) {
+      throw new BadCredentialsException("Invalid token");
+    }
+
     String jti = jwtTokenHelper.extractJti(token);
+
     if (redisRepository.isAccessJtiBlacklisted(jti)) {
       throw new BadCredentialsException("Token is logged out");
     }
+
     String username = jwtTokenHelper.extractUsername(token);
+
     if (username != null) {
       UserEntity userEntity = userService.getUserByUsername(username);
 
