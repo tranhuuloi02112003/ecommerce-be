@@ -4,10 +4,9 @@ import com.lh.ecommerce.dto.response.TokenResponse;
 import com.lh.ecommerce.dto.resquest.LoginRequest;
 import com.lh.ecommerce.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,5 +17,11 @@ public class AuthController {
   @PostMapping("/token")
   public TokenResponse login(@RequestBody LoginRequest loginRequest) {
     return authService.login(loginRequest);
+  }
+
+  @PostMapping("/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+    authService.logout(authorization);
   }
 }
