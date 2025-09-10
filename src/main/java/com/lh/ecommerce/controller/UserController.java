@@ -1,7 +1,7 @@
 package com.lh.ecommerce.controller;
 
-import com.lh.ecommerce.dto.response.User;
-import com.lh.ecommerce.service.UserService;
+import com.lh.ecommerce.dto.response.UserResponse;
+import com.lh.ecommerce.service.user.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
   private final UserService userService;
 
-  @GetMapping()
-  public List<User> getAllUser() {
+  @GetMapping
+  public List<UserResponse> getAllUser() {
     return userService.getAllUser();
   }
 }

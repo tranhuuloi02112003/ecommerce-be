@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserResponse {
   private UUID id;
   private String username;
   private Instant createdAt;

@@ -26,7 +26,7 @@ public class SecurityConfig {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/api/auth/login").permitAll().anyRequest().authenticated())
+                auth.requestMatchers("/api/auth/token").permitAll().anyRequest().authenticated())
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(Customizer.withDefaults())
         .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
