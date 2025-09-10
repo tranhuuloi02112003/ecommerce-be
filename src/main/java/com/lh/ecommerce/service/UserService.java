@@ -1,6 +1,6 @@
 package com.lh.ecommerce.service;
 
-import com.lh.ecommerce.dto.response.User;
+import com.lh.ecommerce.dto.response.UserResponse;
 import com.lh.ecommerce.entity.UserEntity;
 import com.lh.ecommerce.mapper.UserMapper;
 import com.lh.ecommerce.repository.UserRepository;
@@ -15,9 +15,9 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
 
-  public List<User> getAllUser() {
+  public List<UserResponse> getAllUser() {
     List<UserEntity> userEntities = userRepository.findAll();
-    return userMapper.toDtoList(userEntities);
+    return userMapper.toUsersResponseList(userEntities);
   }
 
   public UserEntity getUserByUsername(String username) {
