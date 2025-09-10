@@ -20,10 +20,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-    private static final String BEARER_PREFIX = "Bearer ";
+  private static final String BEARER_PREFIX = "Bearer ";
 
-    private final UserService userService;
-    private final JwtTokenHelper jwtTokenHelper;
+  private final UserService userService;
+  private final JwtTokenHelper jwtTokenHelper;
   private final RedisRepository redisRepository;
 
   @Override
