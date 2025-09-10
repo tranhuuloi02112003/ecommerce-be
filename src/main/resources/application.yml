@@ -20,3 +20,6 @@ spring:
     redis:
       host: localhost
       port: 6380
+  security:
+    secret-key: a89c31e68731757d7100da93c2e301b36ee46383f8f951784bae6817ae8fa6c5d04882
+    access-minutes: 5
