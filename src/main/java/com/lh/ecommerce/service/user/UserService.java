@@ -1,4 +1,4 @@
-package com.lh.ecommerce.service;
+package com.lh.ecommerce.service.user;
 
 import com.lh.ecommerce.dto.response.UserResponse;
 import com.lh.ecommerce.entity.UserEntity;
