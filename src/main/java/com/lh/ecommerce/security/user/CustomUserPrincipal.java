@@ -4,10 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Builder
+@Getter
 public class CustomUserPrincipal implements UserDetails {
   private UUID id;
   private String username;

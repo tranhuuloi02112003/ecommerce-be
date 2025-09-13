@@ -6,29 +6,25 @@ import java.util.UUID;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "images")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity {
+public class ImageEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  private String username;
-  private String password;
+  @Column(name = "product_id")
+  private UUID productId;
+
+  private String url;
 
   @Column(name = "created_at")
   private Instant createdAt;
 
   @Column(name = "updated_at")
   private Instant updatedAt;
-
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @Column(name = "updated_by")
-  private UUID updatedBy;
 }
