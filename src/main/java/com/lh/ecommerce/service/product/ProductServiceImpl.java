@@ -45,4 +45,11 @@ public class ProductServiceImpl implements ProductService {
     ProductEntity saved = productRepository.save(product);
     return productMapper.toProductResponse(saved);
   }
+
+  @Override
+  public void delete(UUID id) {
+    ProductEntity product =
+        productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+    productRepository.delete(product);
+  }
 }
