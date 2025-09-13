@@ -31,4 +31,15 @@ public class CategoryEntity {
 
   @Column(name = "updated_by")
   private UUID updatedBy;
+
+  @PrePersist
+  public void prePersist() {
+    this.createdAt = java.time.Instant.now();
+    this.updatedAt = java.time.Instant.now();
+  }
+
+  @PreUpdate
+  public void preUpdate() {
+    this.updatedAt = java.time.Instant.now();
+  }
 }
