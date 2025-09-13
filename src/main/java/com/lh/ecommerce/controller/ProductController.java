@@ -1,8 +1,9 @@
 package com.lh.ecommerce.controller;
 
 import com.lh.ecommerce.dto.response.ProductResponse;
-import com.lh.ecommerce.dto.resquest.ProductCreateRequest;
+import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.service.product.ProductService;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,14 @@ public class ProductController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public ProductResponse createProduct(@RequestBody ProductCreateRequest productCreateRequest) {
-    return productService.create(productCreateRequest);
+  public ProductResponse createProduct(@RequestBody ProductRequest productRequest) {
+    return productService.create(productRequest);
+  }
+
+  @PutMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public ProductResponse updateProduct(
+      @PathVariable UUID id, @RequestBody ProductRequest productRequest) {
+    return productService.update(id, productRequest);
   }
 }
