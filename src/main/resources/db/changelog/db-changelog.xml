@@ -9,4 +9,5 @@
    <include file="db/changelog/changeset/03-create-products-table-20250910.xml"/>
    <include file="db/changelog/changeset/04-create-images-table-20250910.xml"/>
    <include file="db/changelog/changeset/05-alter-products-categories-add-created-updated-by-20250913.xml"/>
+   <include file="db/changelog/changeset/06-create-colors-and-product_colors-tables-20250913.xml"/>
 </databaseChangeLog>
