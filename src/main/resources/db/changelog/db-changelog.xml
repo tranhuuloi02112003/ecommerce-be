@@ -7,4 +7,6 @@
    <include file="db/changelog/changeset/01-create-users-table-20250906.xml"/>
    <include file="db/changelog/changeset/02-create-categories-table-20250910.xml"/>
    <include file="db/changelog/changeset/03-create-products-table-20250910.xml"/>
+   <include file="db/changelog/changeset/04-create-images-table-20250910.xml"/>
+   <include file="db/changelog/changeset/05-alter-products-categories-add-created-updated-by-20250913.xml"/>
 </databaseChangeLog>
