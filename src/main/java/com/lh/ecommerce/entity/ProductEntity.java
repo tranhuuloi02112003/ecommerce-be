@@ -6,19 +6,23 @@ import java.util.UUID;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "products")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity {
+public class ProductEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  private String username;
-  private String password;
+  private String name;
+  private String description;
+  private double price;
+
+  @Column(name = "category_id")
+  private UUID categoryId;
 
   @Column(name = "created_at")
   private Instant createdAt;
