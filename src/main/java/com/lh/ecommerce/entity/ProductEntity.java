@@ -38,12 +38,12 @@ public class ProductEntity {
 
   @PrePersist
   public void prePersist() {
-    this.createdAt = java.time.Instant.now();
-    this.updatedAt = java.time.Instant.now();
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
   }
 
   @PreUpdate
   public void preUpdate() {
-    this.updatedAt = java.time.Instant.now();
+    this.updatedAt = Instant.now();
   }
 }
