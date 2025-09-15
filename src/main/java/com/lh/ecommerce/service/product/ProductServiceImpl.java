@@ -7,7 +7,6 @@ import com.lh.ecommerce.mapper.ProductMapper;
 import com.lh.ecommerce.repository.CategoryRepository;
 import com.lh.ecommerce.repository.ProductRepository;
 import com.lh.ecommerce.service.category.CategoryError;
-import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,10 +25,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     ProductEntity entity = productMapper.toEntity(request);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    entity.setUpdatedBy(idUser);
-    entity.setCreatedBy(idUser);
-
     ProductEntity saved = productRepository.save(entity);
     return productMapper.toResponse(saved);
   }
@@ -40,8 +35,6 @@ public class ProductServiceImpl implements ProductService {
         productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
 
     productMapper.updateFromRequest(request, product);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    product.setUpdatedBy(idUser);
 
     ProductEntity saved = productRepository.save(product);
     return productMapper.toResponse(saved);

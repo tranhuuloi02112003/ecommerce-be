@@ -1,7 +1,6 @@
 package com.lh.ecommerce.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
 
@@ -12,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductEntity {
+public class ProductEntity extends BaseAuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
@@ -23,27 +22,4 @@ public class ProductEntity {
 
   @Column(name = "category_id")
   private UUID categoryId;
-
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @Column(name = "updated_at")
-  private Instant updatedAt;
-
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @Column(name = "updated_by")
-  private UUID updatedBy;
-
-  @PrePersist
-  public void prePersist() {
-    this.createdAt = Instant.now();
-    this.updatedAt = Instant.now();
-  }
-
-  @PreUpdate
-  public void preUpdate() {
-    this.updatedAt = Instant.now();
-  }
 }
