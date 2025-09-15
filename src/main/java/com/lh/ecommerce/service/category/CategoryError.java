@@ -1,4 +1,4 @@
-package com.lh.ecommerce.service.user;
+package com.lh.ecommerce.service.category;
 
 import com.lh.ecommerce.exception.Error;
 import com.lh.ecommerce.exception.NotFoundException;
@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum UserError implements Error {
-  USER_NOTFOUND("User not found"),
+public enum CategoryError implements Error {
+  CATEGORY_NOTFOUND("Category not found"),
   ;
   private final String message;
 
@@ -18,7 +18,7 @@ public enum UserError implements Error {
     return name();
   }
 
-  public static Supplier<NotFoundException> userNotFound() {
-    return () -> new NotFoundException(USER_NOTFOUND);
+  public static Supplier<NotFoundException> categoryNotFound() {
+    return () -> new NotFoundException(CATEGORY_NOTFOUND);
   }
 }

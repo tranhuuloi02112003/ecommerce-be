@@ -6,6 +6,7 @@ import com.lh.ecommerce.entity.ProductEntity;
 import com.lh.ecommerce.mapper.ProductMapper;
 import com.lh.ecommerce.repository.CategoryRepository;
 import com.lh.ecommerce.repository.ProductRepository;
+import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public ProductResponse create(ProductCreateRequest request) {
     if (!categoryRepository.existsById(request.categoryId())) {
-      throw new RuntimeException("Category not found");
+      throw CategoryError.categoryNotFound().get();
     }
 
     ProductEntity entity = productMapper.toProductEntity(request);
