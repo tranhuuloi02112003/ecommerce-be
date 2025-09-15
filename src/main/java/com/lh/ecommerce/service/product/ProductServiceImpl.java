@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public void delete(UUID id) {
     ProductEntity product =
-        productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
     productRepository.delete(product);
   }
 }
