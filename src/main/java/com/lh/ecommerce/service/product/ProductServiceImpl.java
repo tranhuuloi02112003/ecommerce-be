@@ -6,6 +6,7 @@ import com.lh.ecommerce.entity.ProductEntity;
 import com.lh.ecommerce.mapper.ProductMapper;
 import com.lh.ecommerce.repository.CategoryRepository;
 import com.lh.ecommerce.repository.ProductRepository;
+import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,35 +22,35 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public ProductResponse create(ProductRequest request) {
     if (!categoryRepository.existsById(request.categoryId())) {
-      throw new RuntimeException("Category not found");
+      throw CategoryError.categoryNotFound().get();
     }
 
-    ProductEntity entity = productMapper.toNewProductEntity(request);
+    ProductEntity entity = productMapper.toEntity(request);
     UUID idUser = SecurityUtils.getCurrentUserId();
     entity.setUpdatedBy(idUser);
     entity.setCreatedBy(idUser);
 
     ProductEntity saved = productRepository.save(entity);
-    return productMapper.toProductResponse(saved);
+    return productMapper.toResponse(saved);
   }
 
   @Override
   public ProductResponse update(UUID id, ProductRequest request) {
     ProductEntity product =
-        productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
 
-    productMapper.updateEntityFromRequest(request, product);
+    productMapper.updateFromRequest(request, product);
     UUID idUser = SecurityUtils.getCurrentUserId();
     product.setUpdatedBy(idUser);
 
     ProductEntity saved = productRepository.save(product);
-    return productMapper.toProductResponse(saved);
+    return productMapper.toResponse(saved);
   }
 
   @Override
   public void delete(UUID id) {
     ProductEntity product =
-        productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
     productRepository.delete(product);
   }
 }

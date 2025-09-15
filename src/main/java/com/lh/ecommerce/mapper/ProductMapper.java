@@ -9,19 +9,12 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
-  ProductResponse toProductResponse(ProductEntity entity);
+  ProductResponse toResponse(ProductEntity entity);
+
+  ProductEntity toEntity(ProductRequest request);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
-  @Mapping(target = "updatedBy", ignore = true)
-  ProductEntity toNewProductEntity(ProductRequest request);
-
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "createdBy", ignore = true)
-  @Mapping(target = "updatedBy", ignore = true)
-  void updateEntityFromRequest(ProductRequest request, @MappingTarget ProductEntity entity);
+  void updateFromRequest(ProductRequest request, @MappingTarget ProductEntity entity);
 }
