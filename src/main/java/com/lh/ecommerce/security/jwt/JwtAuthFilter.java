@@ -34,6 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
     if (bearerToken == null || !bearerToken.startsWith(BEARER_PREFIX)) {
       filterChain.doFilter(request, response);
+      return;
     }
 
     String token = bearerToken.replace(BEARER_PREFIX, "");
