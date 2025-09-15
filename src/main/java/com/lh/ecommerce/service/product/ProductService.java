@@ -8,4 +8,6 @@ public interface ProductService {
   ProductResponse create(ProductRequest request);
 
   ProductResponse update(UUID id, ProductRequest request);
+
+  void delete(UUID id);
 }

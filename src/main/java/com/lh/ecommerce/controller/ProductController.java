@@ -26,4 +26,10 @@ public class ProductController {
       @PathVariable UUID id, @RequestBody ProductRequest productRequest) {
     return productService.update(id, productRequest);
   }
+
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteProduct(@PathVariable UUID id) {
+    productService.delete(id);
+  }
 }
