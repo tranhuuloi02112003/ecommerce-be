@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ProductError implements Error {
-  PRODUCT_NOTFOUND("Product not found"),;
+  PRODUCT_NOTFOUND("Product not found"),
+  ;
   private final String message;
 
   @Override

@@ -18,7 +18,7 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   public CategoryResponse create(CategoryRequest request) {
-    CategoryEntity entity = categoryMapper.toNewCategoryEntity(request);
+    CategoryEntity entity = categoryMapper.toEntity(request);
     UUID idUser = SecurityUtils.getCurrentUserId();
     entity.setUpdatedBy(idUser);
     entity.setCreatedBy(idUser);
