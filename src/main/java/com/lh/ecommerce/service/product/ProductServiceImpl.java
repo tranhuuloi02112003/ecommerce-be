@@ -25,25 +25,25 @@ public class ProductServiceImpl implements ProductService {
       throw CategoryError.categoryNotFound().get();
     }
 
-    ProductEntity entity = productMapper.toNewProductEntity(request);
+    ProductEntity entity = productMapper.toEntity(request);
     UUID idUser = SecurityUtils.getCurrentUserId();
     entity.setUpdatedBy(idUser);
     entity.setCreatedBy(idUser);
 
     ProductEntity saved = productRepository.save(entity);
-    return productMapper.toProductResponse(saved);
+    return productMapper.toResponse(saved);
   }
 
   @Override
   public ProductResponse update(UUID id, ProductRequest request) {
     ProductEntity product =
-        productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
 
-    productMapper.updateEntityFromRequest(request, product);
+    productMapper.updateFromRequest(request, product);
     UUID idUser = SecurityUtils.getCurrentUserId();
     product.setUpdatedBy(idUser);
 
     ProductEntity saved = productRepository.save(product);
-    return productMapper.toProductResponse(saved);
+    return productMapper.toResponse(saved);
   }
 }
