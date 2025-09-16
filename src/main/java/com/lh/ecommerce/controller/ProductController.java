@@ -1,5 +1,7 @@
 package com.lh.ecommerce.controller;
 
+import com.lh.ecommerce.dto.response.PagedResponse;
+import com.lh.ecommerce.dto.response.ProductListItemResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.service.product.ProductService;
@@ -31,5 +33,11 @@ public class ProductController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteProduct(@PathVariable UUID id) {
     productService.delete(id);
+  }
+
+  @GetMapping
+  public PagedResponse<ProductListItemResponse> getAll(
+      @RequestParam int page, @RequestParam int size) {
+    return productService.getAll(page, size);
   }
 }
