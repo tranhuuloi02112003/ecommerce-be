@@ -5,9 +5,7 @@ import com.lh.ecommerce.dto.resquest.CategoryRequest;
 import com.lh.ecommerce.entity.CategoryEntity;
 import com.lh.ecommerce.mapper.CategoryMapper;
 import com.lh.ecommerce.repository.CategoryRepository;
-import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +17,6 @@ public class CategoryService {
 
   public CategoryResponse create(CategoryRequest request) {
     CategoryEntity entity = categoryMapper.toEntity(request);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    entity.setUpdatedBy(idUser);
-    entity.setCreatedBy(idUser);
 
     CategoryEntity saved = categoryRepository.save(entity);
     return categoryMapper.toResponse(saved);
