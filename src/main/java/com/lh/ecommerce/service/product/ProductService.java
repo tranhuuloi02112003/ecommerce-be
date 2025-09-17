@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -85,14 +86,16 @@ public class ProductService {
 
   @Transactional(readOnly = true)
   public PagedResponse<ProductListItemResponse> getAll(ProductCriteriaRequest criteria) {
-    Pageable pageable = PageRequest.of(criteria.getPage(), criteria.getSize());
+    Pageable pageable = PageRequest.of(criteria.getPage() - 1, criteria.getSize());
 
-    String search =
-        (criteria.getSearch() == null || criteria.getSearch().isBlank())
-            ? null
-            : criteria.getSearch().trim().toLowerCase();
+    String search = criteria.getSearch();
+    Page<ProductEntity> pageData;
 
-    Page<ProductEntity> pageData = productRepository.search(search, pageable);
+    if (!StringUtils.hasText(search)) {
+      pageData = productRepository.findAll(pageable);
+    } else {
+      pageData = productRepository.search(search.trim(), pageable);
+    }
 
     if (pageData.isEmpty()) {
       return new PagedResponse<>(List.of(), pageUtils.toMeta(pageData));
