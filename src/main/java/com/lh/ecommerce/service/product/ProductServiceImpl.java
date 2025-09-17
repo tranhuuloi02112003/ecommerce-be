@@ -10,12 +10,12 @@ import com.lh.ecommerce.repository.CategoryRepository;
 import com.lh.ecommerce.repository.ImageRepository;
 import com.lh.ecommerce.repository.ProductRepository;
 import com.lh.ecommerce.service.category.CategoryError;
-import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +34,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     ProductEntity entity = productMapper.toEntity(request);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    entity.setUpdatedBy(idUser);
-    entity.setCreatedBy(idUser);
     ProductEntity saved = productRepository.save(entity);
 
     List<String> urls = request.imageUrls();
-    if (urls != null && !urls.isEmpty()) {
+    if (!CollectionUtils.isEmpty(urls)) {
       List<ImageEntity> images = imageMapper.toEntityList(urls, saved.getId());
       imageRepository.saveAll(images);
       return productMapper.toResponse(saved, urls);
@@ -55,13 +52,11 @@ public class ProductServiceImpl implements ProductService {
         productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
 
     productMapper.updateFromRequest(request, product);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    product.setUpdatedBy(idUser);
 
     ProductEntity saved = productRepository.save(product);
 
     List<String> urls = request.imageUrls();
-    if (urls == null || urls.isEmpty()) {
+    if (CollectionUtils.isEmpty(urls)) {
       return productMapper.toResponse(saved);
     }
 
