@@ -3,8 +3,10 @@ package com.lh.ecommerce.controller;
 import com.lh.ecommerce.dto.response.PagedResponse;
 import com.lh.ecommerce.dto.response.ProductListItemResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
+import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.service.product.ProductService;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,7 +39,7 @@ public class ProductController {
 
   @GetMapping
   public PagedResponse<ProductListItemResponse> getAll(
-      @RequestParam int page, @RequestParam int size) {
-    return productService.getAll(page, size);
+      @Valid @ModelAttribute ProductCriteriaRequest criteria) {
+    return productService.getAll(criteria);
   }
 }
