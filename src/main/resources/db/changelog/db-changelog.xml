@@ -11,4 +11,5 @@
    <include file="db/changelog/changeset/05-alter-products-categories-add-created-updated-by-20250913.xml"/>
    <include file="db/changelog/changeset/06-create-colors-and-product_colors-tables-20250913.xml"/>
    <include file="db/changelog/changeset/07-create-sizes-and-product_sizes-20250913.xml"/>
+   <include file="db/changelog/changeset/08-alter-images-add-is_main-remove-created_at-updated_at.xml"/>
 </databaseChangeLog>
