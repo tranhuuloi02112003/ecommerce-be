@@ -1,7 +1,6 @@
 package com.lh.ecommerce.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
 
@@ -22,9 +21,5 @@ public class ImageEntity {
 
   private String url;
 
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @Column(name = "updated_at")
-  private Instant updatedAt;
+  private boolean isMain;
 }

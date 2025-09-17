@@ -3,6 +3,7 @@ package com.lh.ecommerce.service.product;
 import com.lh.ecommerce.dto.response.PagedResponse;
 import com.lh.ecommerce.dto.response.ProductListItemResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
+import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.CategoryEntity;
 import com.lh.ecommerce.entity.ImageEntity;
@@ -14,16 +15,18 @@ import com.lh.ecommerce.repository.ProductRepository;
 import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.service.image.ImageService;
 import com.lh.ecommerce.utils.PageUtils;
-import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -42,14 +45,11 @@ public class ProductService {
     }
 
     ProductEntity entity = productMapper.toEntity(request);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    entity.setUpdatedBy(idUser);
-    entity.setCreatedBy(idUser);
     ProductEntity saved = productRepository.save(entity);
 
     List<String> urls = request.imageUrls();
     if (urls != null && !urls.isEmpty()) {
-      List<ImageEntity> images = imageMapper.toEntityList(urls, saved.getId());
+      List<ImageEntity> images = imageMapper.toEntity(urls, saved.getId());
       imageService.saveImages(images);
       return productMapper.toResponse(saved, urls);
     }
@@ -62,18 +62,18 @@ public class ProductService {
         productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
 
     productMapper.updateFromRequest(request, product);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    product.setUpdatedBy(idUser);
 
     ProductEntity saved = productRepository.save(product);
 
     List<String> urls = request.imageUrls();
-    if (urls == null || urls.isEmpty()) {
-      return productMapper.toResponse(saved);
+    if (CollectionUtils.isEmpty(urls)) {
+      imageService.deleteByProductId(saved.getId());
+      return productMapper.toResponse(saved, null);
     }
 
     imageService.deleteByProductId(saved.getId());
-    imageService.saveImages(imageMapper.toEntityList(urls, saved.getId()));
+    List<ImageEntity> images = imageMapper.toEntity(urls, saved.getId());
+    imageService.saveImages(images);
 
     return productMapper.toResponse(saved, urls);
   }
@@ -85,10 +85,17 @@ public class ProductService {
   }
 
   @Transactional(readOnly = true)
-  public PagedResponse<ProductListItemResponse> getAll(int page, int size) {
-    Pageable pageable = pageUtils.pageableFromClient(page, size);
+  public PagedResponse<ProductListItemResponse> getAll(ProductCriteriaRequest criteria) {
+    Pageable pageable = PageRequest.of(criteria.getPage() - 1, criteria.getSize());
 
-    Page<ProductEntity> pageData = productRepository.findAll(pageable);
+    String search = criteria.getSearch();
+    Page<ProductEntity> pageData;
+
+    if (!StringUtils.hasText(search)) {
+      pageData = productRepository.findAll(pageable);
+    } else {
+      pageData = productRepository.search(search.trim(), pageable);
+    }
 
     if (pageData.isEmpty()) {
       return new PagedResponse<>(List.of(), pageUtils.toMeta(pageData));
@@ -99,7 +106,7 @@ public class ProductService {
     List<UUID> categoryIds =
         products.stream().map(ProductEntity::getCategoryId).distinct().toList();
 
-    Map<UUID, String> firstUrlByProductId = imageService.getFirstImageUrls(ids);
+    Map<UUID, String> firstUrlByProductId = imageService.getMainImageUrls(ids);
 
     Map<UUID, String> categoryNameById =
         categoryRepository.findByIdIn(categoryIds).stream()

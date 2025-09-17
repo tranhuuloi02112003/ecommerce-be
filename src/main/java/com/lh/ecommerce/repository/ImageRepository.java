@@ -14,13 +14,10 @@ public interface ImageRepository extends JpaRepository<ImageEntity, UUID> {
   void deleteByProductId(UUID productId);
 
   @Query(
-      value =
-          """
-    SELECT DISTINCT ON (product_id) *
-    FROM images
-    WHERE product_id IN (:ids)
-    ORDER BY product_id, id ASC
-""",
-      nativeQuery = true)
-  List<ImageEntity> findFirstByProductIds(@Param("ids") Collection<UUID> ids);
+      """
+    SELECT i
+    FROM ImageEntity i
+    WHERE i.productId IN :ids AND i.isMain = true
+""")
+  List<ImageEntity> findMainByProductIds(@Param("ids") Collection<UUID> ids);
 }
