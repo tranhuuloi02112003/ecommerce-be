@@ -15,7 +15,6 @@ import com.lh.ecommerce.repository.ProductRepository;
 import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.service.image.ImageService;
 import com.lh.ecommerce.utils.PageUtils;
-import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -44,14 +44,11 @@ public class ProductService {
     }
 
     ProductEntity entity = productMapper.toEntity(request);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    entity.setUpdatedBy(idUser);
-    entity.setCreatedBy(idUser);
     ProductEntity saved = productRepository.save(entity);
 
     List<String> urls = request.imageUrls();
     if (urls != null && !urls.isEmpty()) {
-      List<ImageEntity> images = imageMapper.toEntityList(urls, saved.getId());
+      List<ImageEntity> images = imageMapper.toEntity(urls, saved.getId());
       imageService.saveImages(images);
       return productMapper.toResponse(saved, urls);
     }
@@ -64,18 +61,18 @@ public class ProductService {
         productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
 
     productMapper.updateFromRequest(request, product);
-    UUID idUser = SecurityUtils.getCurrentUserId();
-    product.setUpdatedBy(idUser);
 
     ProductEntity saved = productRepository.save(product);
 
     List<String> urls = request.imageUrls();
-    if (urls == null || urls.isEmpty()) {
-      return productMapper.toResponse(saved);
+    if (CollectionUtils.isEmpty(urls)) {
+      imageService.deleteByProductId(saved.getId());
+      return productMapper.toResponse(saved, null);
     }
 
     imageService.deleteByProductId(saved.getId());
-    imageService.saveImages(imageMapper.toEntityList(urls, saved.getId()));
+    List<ImageEntity> images = imageMapper.toEntity(urls, saved.getId());
+    imageService.saveImages(images);
 
     return productMapper.toResponse(saved, urls);
   }
@@ -106,7 +103,7 @@ public class ProductService {
     List<UUID> categoryIds =
         products.stream().map(ProductEntity::getCategoryId).distinct().toList();
 
-    Map<UUID, String> firstUrlByProductId = imageService.getFirstImageUrls(ids);
+    Map<UUID, String> firstUrlByProductId = imageService.getMainImageUrls(ids);
 
     Map<UUID, String> categoryNameById =
         categoryRepository.findByIdIn(categoryIds).stream()

@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -19,10 +20,12 @@ public class ImageService {
     imageRepository.saveAll(images);
   }
 
-  public Map<UUID, String> getFirstImageUrls(Collection<UUID> ids) {
-    if (ids == null || ids.isEmpty()) return Map.of();
-    List<ImageEntity> firstImages = imageRepository.findFirstByProductIds(ids);
-    return firstImages.stream()
+  public Map<UUID, String> getMainImageUrls(Collection<UUID> ids) {
+    if (CollectionUtils.isEmpty(ids)) {
+      return Map.of();
+    }
+    List<ImageEntity> mainImages = imageRepository.findMainByProductIds(ids);
+    return mainImages.stream()
         .collect(Collectors.toMap(ImageEntity::getProductId, ImageEntity::getUrl));
   }
 
