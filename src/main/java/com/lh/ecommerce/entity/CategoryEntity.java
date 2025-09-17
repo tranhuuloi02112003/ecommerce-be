@@ -1,7 +1,6 @@
 package com.lh.ecommerce.entity;
 
 import jakarta.persistence.*;
-import java.util.UUID;
 import lombok.*;
 
 @Entity
@@ -12,10 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CategoryEntity extends BaseAuditEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
-
   private String name;
   private String description;
 }

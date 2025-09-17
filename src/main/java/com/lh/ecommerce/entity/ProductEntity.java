@@ -12,10 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ProductEntity extends BaseAuditEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
-
   private String name;
   private String description;
   private double price;
