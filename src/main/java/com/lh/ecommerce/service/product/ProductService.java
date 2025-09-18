@@ -14,6 +14,7 @@ import com.lh.ecommerce.service.color.ColorError;
 import com.lh.ecommerce.service.image.ImageService;
 import com.lh.ecommerce.service.size.SizeError;
 import com.lh.ecommerce.utils.PageUtils;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,23 +44,7 @@ public class ProductService {
 
   @Transactional
   public ProductResponse create(ProductRequest request) {
-    if (!categoryRepository.existsById(request.categoryId())) {
-      throw CategoryError.categoryNotFound().get();
-    }
-
-    if (!CollectionUtils.isEmpty(request.colorIds())) {
-      long count = colorRepository.countByIdIn(request.colorIds());
-      if (count != request.colorIds().size()) {
-        throw ColorError.colorNotFound().get();
-      }
-    }
-
-    if (!CollectionUtils.isEmpty(request.sizeIds())) {
-      long count = sizeRepository.countByIdIn(request.sizeIds());
-      if (count != request.sizeIds().size()) {
-        throw SizeError.sizeNotFound().get();
-      }
-    }
+    validateRefs(request);
 
     ProductEntity entity = productMapper.toEntity(request);
     ProductEntity saved = productRepository.save(entity);
@@ -158,5 +143,35 @@ public class ProductService {
                 })
             .toList();
     return new PagedResponse<>(items, pageUtils.toMeta(pageData));
+  }
+
+  private void validateRefs(ProductRequest request) {
+    validateCategory(request.categoryId());
+    validateColors(request.colorIds());
+    validateSizes(request.sizeIds());
+  }
+
+  private void validateCategory(UUID categoryId) {
+    if (!categoryRepository.existsById(categoryId)) {
+      throw CategoryError.categoryNotFound().get();
+    }
+  }
+
+  private void validateColors(List<UUID> colorIds) {
+    if (CollectionUtils.isEmpty(colorIds)) return;
+    int distinctSize = new HashSet<>(colorIds).size();
+    long count = colorRepository.countByIdIn(colorIds);
+    if (count != distinctSize) {
+      throw ColorError.colorNotFound().get();
+    }
+  }
+
+  private void validateSizes(List<UUID> sizeIds) {
+    if (CollectionUtils.isEmpty(sizeIds)) return;
+    int distinctSize = new HashSet<>(sizeIds).size();
+    long count = sizeRepository.countByIdIn(sizeIds);
+    if (count != distinctSize) {
+      throw SizeError.sizeNotFound().get();
+    }
   }
 }
