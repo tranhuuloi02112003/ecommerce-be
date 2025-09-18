@@ -145,6 +145,26 @@ public class ProductService {
     return new PagedResponse<>(items, pageUtils.toMeta(pageData));
   }
 
+  @Transactional(readOnly = true)
+  public ProductResponse getById(UUID productId) {
+    ProductEntity product =
+        productRepository.findById(productId).orElseThrow(ProductError.productNotFound());
+
+    List<String> imageUrls = imageService.findUrlsByProductId(productId);
+    List<UUID> colorIds = productColorRepository.findColorIdsByProductId(productId);
+    List<UUID> sizeIds = productSizeRepository.findSizeIdByProductId(productId);
+
+    return new ProductResponse(
+        product.getId(),
+        product.getName(),
+        product.getDescription(),
+        product.getPrice(),
+        product.getCategoryId(),
+        imageUrls,
+        colorIds,
+        sizeIds);
+  }
+
   private void validateRefs(ProductRequest request) {
     validateCategory(request.categoryId());
     validateColors(request.colorIds());

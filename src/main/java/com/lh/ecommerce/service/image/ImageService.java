@@ -32,4 +32,8 @@ public class ImageService {
   public void deleteByProductId(UUID productId) {
     imageRepository.deleteByProductId(productId);
   }
+
+  public List<String> findUrlsByProductId(UUID productId) {
+    return imageRepository.findUrlsByProductId(productId);
+  }
 }

@@ -20,4 +20,13 @@ public interface ImageRepository extends JpaRepository<ImageEntity, UUID> {
     WHERE i.productId IN :ids AND i.isMain = true
 """)
   List<ImageEntity> findMainByProductIds(@Param("ids") Collection<UUID> ids);
+
+  @Query(
+      """
+  SELECT i.url
+  FROM ImageEntity i
+  WHERE i.productId = :productId
+  ORDER BY i.isMain DESC
+""")
+  List<String> findUrlsByProductId(@Param("productId") UUID productId);
 }
