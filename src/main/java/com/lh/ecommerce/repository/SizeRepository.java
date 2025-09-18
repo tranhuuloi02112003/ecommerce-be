@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SizeRepository extends JpaRepository<SizeEntity, UUID> {
+  long countByIdIn(List<UUID> ids);
 }

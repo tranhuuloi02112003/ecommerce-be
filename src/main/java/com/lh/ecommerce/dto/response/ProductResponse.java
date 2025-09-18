@@ -1,6 +1,5 @@
 package com.lh.ecommerce.dto.response;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,7 +10,5 @@ public record ProductResponse(
     Double price,
     UUID categoryId,
     List<String> imageUrls,
-    Instant createdAt,
-    Instant updatedAt,
-    UUID createdBy,
-    UUID updatedBy) {}
+    List<UUID> colorIds,
+    List<UUID> sizeIds) {}

@@ -1,7 +1,16 @@
 package com.lh.ecommerce.dto.resquest;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
 public record ProductRequest(
-    String name, String description, double price, UUID categoryId, List<String> imageUrls) {}
+    @NotBlank String name,
+    @NotBlank String description,
+    @NotNull(message = "Price is required") double price,
+    @NotNull(message = "CategoryId is required") UUID categoryId,
+    @NotEmpty(message = "Image URLs must not be empty") List<@NotBlank String> imageUrls,
+    List<UUID> colorIds,
+    List<UUID> sizeIds) {}
