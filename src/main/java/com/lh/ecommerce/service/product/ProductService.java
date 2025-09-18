@@ -5,15 +5,14 @@ import com.lh.ecommerce.dto.response.ProductListItemResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
-import com.lh.ecommerce.entity.CategoryEntity;
-import com.lh.ecommerce.entity.ImageEntity;
-import com.lh.ecommerce.entity.ProductEntity;
+import com.lh.ecommerce.entity.*;
 import com.lh.ecommerce.mapper.ImageMapper;
 import com.lh.ecommerce.mapper.ProductMapper;
-import com.lh.ecommerce.repository.CategoryRepository;
-import com.lh.ecommerce.repository.ProductRepository;
+import com.lh.ecommerce.repository.*;
 import com.lh.ecommerce.service.category.CategoryError;
+import com.lh.ecommerce.service.color.ColorError;
 import com.lh.ecommerce.service.image.ImageService;
+import com.lh.ecommerce.service.size.SizeError;
 import com.lh.ecommerce.utils.PageUtils;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,10 @@ import org.springframework.util.StringUtils;
 public class ProductService {
   private final ProductRepository productRepository;
   private final CategoryRepository categoryRepository;
+  private final ColorRepository colorRepository;
+  private final SizeRepository sizeRepository;
+  private final ProductColorRepository productColorRepository;
+  private final ProductSizeRepository productSizeRepository;
   private final ImageService imageService;
   private final ProductMapper productMapper;
   private final ImageMapper imageMapper;
@@ -44,16 +47,43 @@ public class ProductService {
       throw CategoryError.categoryNotFound().get();
     }
 
+    if (!CollectionUtils.isEmpty(request.colorIds())) {
+      long count = colorRepository.countByIdIn(request.colorIds());
+      if (count != request.colorIds().size()) {
+        throw ColorError.colorNotFound().get();
+      }
+    }
+
+    if (!CollectionUtils.isEmpty(request.sizeIds())) {
+      long count = sizeRepository.countByIdIn(request.sizeIds());
+      if (count != request.sizeIds().size()) {
+        throw SizeError.sizeNotFound().get();
+      }
+    }
+
     ProductEntity entity = productMapper.toEntity(request);
     ProductEntity saved = productRepository.save(entity);
 
-    List<String> urls = request.imageUrls();
-    if (urls != null && !urls.isEmpty()) {
-      List<ImageEntity> images = imageMapper.toEntity(urls, saved.getId());
-      imageService.saveImages(images);
-      return productMapper.toResponse(saved, urls);
+    List<ImageEntity> images = imageMapper.toEntity(request.imageUrls(), saved.getId());
+    imageService.saveImages(images);
+
+    if (!CollectionUtils.isEmpty(request.colorIds())) {
+      List<ProductColorEntity> productColors =
+          request.colorIds().stream()
+              .map(sid -> new ProductColorEntity(null, saved.getId(), sid))
+              .toList();
+      productColorRepository.saveAll(productColors);
     }
-    return productMapper.toResponse(saved, null);
+
+    if (!CollectionUtils.isEmpty(request.sizeIds())) {
+      List<ProductSizeEntity> productSizes =
+          request.sizeIds().stream()
+              .map(sid -> new ProductSizeEntity(null, saved.getId(), sid))
+              .toList();
+      productSizeRepository.saveAll(productSizes);
+    }
+
+    return productMapper.toResponse(saved, request.imageUrls());
   }
 
   @Transactional
