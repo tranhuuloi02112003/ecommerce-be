@@ -42,4 +42,9 @@ public class ProductController {
       @Valid @ModelAttribute ProductCriteriaRequest criteria) {
     return productService.getAll(criteria);
   }
+
+  @GetMapping("/{id}")
+  public ProductResponse getById(@PathVariable("id") UUID productId) {
+    return productService.getById(productId);
+  }
 }

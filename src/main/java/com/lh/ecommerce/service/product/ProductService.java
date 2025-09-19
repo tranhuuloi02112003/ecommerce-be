@@ -14,7 +14,6 @@ import com.lh.ecommerce.service.color.ColorError;
 import com.lh.ecommerce.service.image.ImageService;
 import com.lh.ecommerce.service.size.SizeError;
 import com.lh.ecommerce.utils.PageUtils;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,24 +48,9 @@ public class ProductService {
     ProductEntity entity = productMapper.toEntity(request);
     ProductEntity saved = productRepository.save(entity);
 
-    List<ImageEntity> images = imageMapper.toEntity(request.imageUrls(), saved.getId());
-    imageService.saveImages(images);
-
-    if (!CollectionUtils.isEmpty(request.colorIds())) {
-      List<ProductColorEntity> productColors =
-          request.colorIds().stream()
-              .map(sid -> new ProductColorEntity(null, saved.getId(), sid))
-              .toList();
-      productColorRepository.saveAll(productColors);
-    }
-
-    if (!CollectionUtils.isEmpty(request.sizeIds())) {
-      List<ProductSizeEntity> productSizes =
-          request.sizeIds().stream()
-              .map(sid -> new ProductSizeEntity(null, saved.getId(), sid))
-              .toList();
-      productSizeRepository.saveAll(productSizes);
-    }
+    upsertImages(saved.getId(), request.imageUrls(), false);
+    upsertColors(saved.getId(), request.colorIds(), false);
+    upsertSizes(saved.getId(), request.sizeIds(), false);
 
     return productMapper.toResponse(saved, request.imageUrls());
   }
@@ -75,22 +59,16 @@ public class ProductService {
   public ProductResponse update(UUID id, ProductRequest request) {
     ProductEntity product =
         productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
+    validateRefs(request);
 
     productMapper.updateFromRequest(request, product);
-
     ProductEntity saved = productRepository.save(product);
 
-    List<String> urls = request.imageUrls();
-    if (CollectionUtils.isEmpty(urls)) {
-      imageService.deleteByProductId(saved.getId());
-      return productMapper.toResponse(saved, null);
-    }
+    upsertImages(saved.getId(), request.imageUrls(), true);
+    upsertColors(saved.getId(), request.colorIds(), true);
+    upsertSizes(saved.getId(), request.sizeIds(), true);
 
-    imageService.deleteByProductId(saved.getId());
-    List<ImageEntity> images = imageMapper.toEntity(urls, saved.getId());
-    imageService.saveImages(images);
-
-    return productMapper.toResponse(saved, urls);
+    return productMapper.toResponse(saved, request.imageUrls());
   }
 
   public void delete(UUID id) {
@@ -145,6 +123,26 @@ public class ProductService {
     return new PagedResponse<>(items, pageUtils.toMeta(pageData));
   }
 
+  @Transactional(readOnly = true)
+  public ProductResponse getById(UUID productId) {
+    ProductEntity product =
+        productRepository.findById(productId).orElseThrow(ProductError.productNotFound());
+
+    List<String> imageUrls = imageService.findUrlsByProductId(productId);
+    List<UUID> colorIds = productColorRepository.findColorIdsByProductId(productId);
+    List<UUID> sizeIds = productSizeRepository.findSizeIdByProductId(productId);
+
+    return new ProductResponse(
+        product.getId(),
+        product.getName(),
+        product.getDescription(),
+        product.getPrice(),
+        product.getCategoryId(),
+        imageUrls,
+        colorIds,
+        sizeIds);
+  }
+
   private void validateRefs(ProductRequest request) {
     validateCategory(request.categoryId());
     validateColors(request.colorIds());
@@ -159,19 +157,51 @@ public class ProductService {
 
   private void validateColors(List<UUID> colorIds) {
     if (CollectionUtils.isEmpty(colorIds)) return;
-    int distinctSize = new HashSet<>(colorIds).size();
     long count = colorRepository.countByIdIn(colorIds);
-    if (count != distinctSize) {
+    if (count != colorIds.size()) {
       throw ColorError.colorNotFound().get();
     }
   }
 
   private void validateSizes(List<UUID> sizeIds) {
     if (CollectionUtils.isEmpty(sizeIds)) return;
-    int distinctSize = new HashSet<>(sizeIds).size();
     long count = sizeRepository.countByIdIn(sizeIds);
-    if (count != distinctSize) {
+    if (count != sizeIds.size()) {
       throw SizeError.sizeNotFound().get();
+    }
+  }
+
+  private void upsertImages(UUID productId, List<String> imageUrls, boolean replace) {
+    if (replace) {
+      imageService.deleteByProductId(productId);
+    }
+    if (!CollectionUtils.isEmpty(imageUrls)) {
+      List<ImageEntity> images = imageMapper.toEntity(imageUrls, productId);
+      imageService.saveImages(images);
+    }
+  }
+
+  private void upsertColors(UUID productId, List<UUID> colorIds, boolean replace) {
+    if (replace) {
+      productColorRepository.deleteByProductId(productId);
+      productColorRepository.flush();
+    }
+    if (!CollectionUtils.isEmpty(colorIds)) {
+      List<ProductColorEntity> list =
+          colorIds.stream().map(cid -> new ProductColorEntity(null, productId, cid)).toList();
+      productColorRepository.saveAll(list);
+    }
+  }
+
+  private void upsertSizes(UUID productId, List<UUID> sizeIds, boolean replace) {
+    if (replace) {
+      productSizeRepository.deleteByProductId(productId);
+      productColorRepository.flush();
+    }
+    if (!CollectionUtils.isEmpty(sizeIds)) {
+      List<ProductSizeEntity> list =
+          sizeIds.stream().map(sid -> new ProductSizeEntity(null, productId, sid)).toList();
+      productSizeRepository.saveAll(list);
     }
   }
 }
