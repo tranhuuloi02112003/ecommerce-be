@@ -10,4 +10,6 @@ import org.springframework.data.repository.query.Param;
 public interface ProductColorRepository extends JpaRepository<ProductColorEntity, UUID> {
   @Query("SELECT pc.colorId FROM ProductColorEntity pc WHERE pc.productId = :productId")
   List<UUID> findColorIdsByProductId(@Param("productId") UUID productId);
+
+  void deleteByProductId(UUID productId);
 }

@@ -10,4 +10,6 @@ import org.springframework.data.repository.query.Param;
 public interface ProductSizeRepository extends JpaRepository<ProductSizeEntity, UUID> {
   @Query("SELECT ps.sizeId FROM ProductSizeEntity ps WHERE ps.productId = :productId")
   List<UUID> findSizeIdByProductId(@Param("productId") UUID productId);
+
+  void deleteByProductId(UUID productId);
 }
