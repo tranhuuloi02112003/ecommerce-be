@@ -5,11 +5,14 @@ import lombok.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class CategoryResponse {
+public class ProductBasicResponse {
   private UUID id;
   private String name;
   private String description;
+  private Double price;
+  private CategoryResponse category;
+  private String mainImage;
 }

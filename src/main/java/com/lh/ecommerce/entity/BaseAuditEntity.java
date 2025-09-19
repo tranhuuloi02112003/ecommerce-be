@@ -3,7 +3,9 @@ package com.lh.ecommerce.entity;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +17,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class BaseAuditEntity {
 
   @Id

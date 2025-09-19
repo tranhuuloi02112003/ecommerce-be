@@ -8,13 +8,16 @@ import com.lh.ecommerce.repository.ColorRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ColorService {
   private final ColorRepository colorRepository;
   private final ColorMapper colorMapper;
 
+  @Transactional
   public ColorResponse create(ColorRequest request) {
     ColorEntity entity = colorMapper.toEntity(request);
 

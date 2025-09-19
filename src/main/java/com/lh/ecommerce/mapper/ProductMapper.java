@@ -1,5 +1,7 @@
 package com.lh.ecommerce.mapper;
 
+import com.lh.ecommerce.dto.response.PageBaseResponse;
+import com.lh.ecommerce.dto.response.ProductBasicResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.ProductEntity;
@@ -7,6 +9,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
@@ -20,5 +23,23 @@ public interface ProductMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
-  void updateFromRequest(ProductRequest request, @MappingTarget ProductEntity entity);
+  void toEntity(ProductRequest request, @MappingTarget ProductEntity entity);
+
+  default PageBaseResponse<ProductBasicResponse> toPageResponse(Page<ProductEntity> pageData) {
+    List<ProductBasicResponse> productBasicResponses =
+        pageData.getContent().stream()
+            .map(
+                productEntity ->
+                    ProductBasicResponse.builder()
+                        .id(productEntity.getId())
+                        .name(productEntity.getName())
+                        .description(productEntity.getDescription())
+                        .price(productEntity.getPrice())
+                        .category(CategoryMapper.INSTANCE.toResponse(productEntity.getCategory()))
+                        .mainImage(productEntity.getMainImage().getUrl())
+                        .build())
+            .toList();
+
+    return new PageBaseResponse<>(productBasicResponses, pageData);
+  }
 }

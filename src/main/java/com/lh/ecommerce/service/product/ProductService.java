@@ -1,7 +1,7 @@
 package com.lh.ecommerce.service.product;
 
-import com.lh.ecommerce.dto.response.PagedResponse;
-import com.lh.ecommerce.dto.response.ProductListItemResponse;
+import com.lh.ecommerce.dto.response.PageBaseResponse;
+import com.lh.ecommerce.dto.response.ProductBasicResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
@@ -11,24 +11,18 @@ import com.lh.ecommerce.mapper.ProductMapper;
 import com.lh.ecommerce.repository.*;
 import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.service.color.ColorError;
-import com.lh.ecommerce.service.image.ImageService;
 import com.lh.ecommerce.service.size.SizeError;
-import com.lh.ecommerce.utils.PageUtils;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductService {
   private final ProductRepository productRepository;
   private final CategoryRepository categoryRepository;
@@ -36,101 +30,63 @@ public class ProductService {
   private final SizeRepository sizeRepository;
   private final ProductColorRepository productColorRepository;
   private final ProductSizeRepository productSizeRepository;
-  private final ImageService imageService;
+  private final ImageRepository imageRepository;
   private final ProductMapper productMapper;
   private final ImageMapper imageMapper;
-  private final PageUtils pageUtils;
 
   @Transactional
   public ProductResponse create(ProductRequest request) {
-    validateRefs(request);
+      validateCategory(request.categoryId());
+      validateColors(request.colorIds());
+      validateSizes(request.sizeIds());
 
-    ProductEntity entity = productMapper.toEntity(request);
-    ProductEntity saved = productRepository.save(entity);
+    ProductEntity productEntity = productRepository.save(productMapper.toEntity(request));
 
-    upsertImages(saved.getId(), request.imageUrls(), false);
-    upsertColors(saved.getId(), request.colorIds(), false);
-    upsertSizes(saved.getId(), request.sizeIds(), false);
+    upsertImages(productEntity.getId(), request.imageUrls(), false);
+      insertColors(productEntity.getId(), request.colorIds());
+    upsertSizes(productEntity.getId(), request.sizeIds(), false);
 
-    return productMapper.toResponse(saved, request.imageUrls());
+    return productMapper.toResponse(productEntity, request.imageUrls());
   }
 
   @Transactional
   public ProductResponse update(UUID id, ProductRequest request) {
-    ProductEntity product =
-        productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
+    final var productEntity = validProduct(id);
     validateRefs(request);
 
-    productMapper.updateFromRequest(request, product);
-    ProductEntity saved = productRepository.save(product);
+    productMapper.toEntity(request, productEntity);
+    ProductEntity saved = productRepository.save(productEntity);
 
     upsertImages(saved.getId(), request.imageUrls(), true);
-    upsertColors(saved.getId(), request.colorIds(), true);
+//    upsertColors(saved.getId(), request.colorIds(), true);
     upsertSizes(saved.getId(), request.sizeIds(), true);
 
     return productMapper.toResponse(saved, request.imageUrls());
   }
 
+  @Transactional
   public void delete(UUID id) {
-    ProductEntity product =
-        productRepository.findById(id).orElseThrow(() -> ProductError.productNotFound().get());
+    ProductEntity product = validProduct(id);
     productRepository.delete(product);
   }
 
-  @Transactional(readOnly = true)
-  public PagedResponse<ProductListItemResponse> getAll(ProductCriteriaRequest criteria) {
-    Pageable pageable = PageRequest.of(criteria.getPage() - 1, criteria.getSize());
-
-    String search = criteria.getSearch();
-    Page<ProductEntity> pageData;
-
-    if (!StringUtils.hasText(search)) {
-      pageData = productRepository.findAll(pageable);
-    } else {
-      pageData = productRepository.search(search.trim(), pageable);
-    }
-
-    if (pageData.isEmpty()) {
-      return new PagedResponse<>(List.of(), pageUtils.toMeta(pageData));
-    }
-
-    List<ProductEntity> products = pageData.getContent();
-    List<UUID> ids = products.stream().map(ProductEntity::getId).toList();
-    List<UUID> categoryIds =
-        products.stream().map(ProductEntity::getCategoryId).distinct().toList();
-
-    Map<UUID, String> firstUrlByProductId = imageService.getMainImageUrls(ids);
-
-    Map<UUID, String> categoryNameById =
-        categoryRepository.findByIdIn(categoryIds).stream()
-            .collect(Collectors.toMap(CategoryEntity::getId, CategoryEntity::getName));
-
-    List<ProductListItemResponse> items =
-        products.stream()
-            .map(
-                productEntity -> {
-                  String url = firstUrlByProductId.get(productEntity.getId());
-                  String categoryName = categoryNameById.get(productEntity.getCategoryId());
-                  return new ProductListItemResponse(
-                      productEntity.getId(),
-                      productEntity.getName(),
-                      productEntity.getDescription(),
-                      productEntity.getPrice(),
-                      categoryName,
-                      url);
-                })
-            .toList();
-    return new PagedResponse<>(items, pageUtils.toMeta(pageData));
+  private ProductEntity validProduct(final UUID id) {
+    return productRepository.findById(id).orElseThrow(ProductError.productNotFound());
   }
 
-  @Transactional(readOnly = true)
-  public ProductResponse getById(UUID productId) {
-    ProductEntity product =
-        productRepository.findById(productId).orElseThrow(ProductError.productNotFound());
+  public PageBaseResponse<ProductBasicResponse> getAll(ProductCriteriaRequest criteria) {
+    Page<ProductEntity> pageData =
+        productRepository.search(criteria.getSearch(), criteria.getPageable());
 
-    List<String> imageUrls = imageService.findUrlsByProductId(productId);
-    List<UUID> colorIds = productColorRepository.findColorIdsByProductId(productId);
-    List<UUID> sizeIds = productSizeRepository.findSizeIdByProductId(productId);
+    return productMapper.toPageResponse(pageData);
+  }
+
+  public ProductResponse getById(UUID id) {
+    ProductEntity product = validProduct(id);
+
+    List<String> imageUrls = imageRepository.findUrlsByProductId(id);
+    List<UUID> colorIds = productColorRepository.findColorIdsByProductId(id);
+    List<UUID> sizeIds = productSizeRepository.findSizeIdByProductId(id);
 
     return new ProductResponse(
         product.getId(),
@@ -157,8 +113,10 @@ public class ProductService {
 
   private void validateColors(List<UUID> colorIds) {
     if (CollectionUtils.isEmpty(colorIds)) return;
-    long count = colorRepository.countByIdIn(colorIds);
-    if (count != colorIds.size()) {
+
+    List<ColorEntity> colors = colorRepository.findAllById(colorIds);
+
+    if (colors.size() != colorIds.size()) {
       throw ColorError.colorNotFound().get();
     }
   }
@@ -173,24 +131,22 @@ public class ProductService {
 
   private void upsertImages(UUID productId, List<String> imageUrls, boolean replace) {
     if (replace) {
-      imageService.deleteByProductId(productId);
+      imageRepository.deleteByProductId(productId);
     }
     if (!CollectionUtils.isEmpty(imageUrls)) {
       List<ImageEntity> images = imageMapper.toEntity(imageUrls, productId);
-      imageService.saveImages(images);
+      imageRepository.saveAll(images);
     }
   }
 
-  private void upsertColors(UUID productId, List<UUID> colorIds, boolean replace) {
-    if (replace) {
-      productColorRepository.deleteByProductId(productId);
-      productColorRepository.flush();
+  private void insertColors(UUID productId, List<UUID> colorIds) {
+    if (CollectionUtils.isEmpty(colorIds)) {
+      return;
     }
-    if (!CollectionUtils.isEmpty(colorIds)) {
-      List<ProductColorEntity> list =
-          colorIds.stream().map(cid -> new ProductColorEntity(null, productId, cid)).toList();
-      productColorRepository.saveAll(list);
-    }
+
+    List<ProductColorEntity> list =
+        colorIds.stream().map(id -> new ProductColorEntity(null, productId, id)).toList();
+    productColorRepository.saveAll(list);
   }
 
   private void upsertSizes(UUID productId, List<UUID> sizeIds, boolean replace) {

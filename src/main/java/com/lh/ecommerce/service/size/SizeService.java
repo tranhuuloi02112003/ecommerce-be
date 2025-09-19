@@ -8,13 +8,16 @@ import com.lh.ecommerce.repository.SizeRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SizeService {
   private final SizeRepository sizeRepository;
   private final SizeMapper sizeMapper;
 
+  @Transactional
   public SizeResponse create(SizeRequest request) {
     SizeEntity entity = sizeMapper.toEntity(request);
 
