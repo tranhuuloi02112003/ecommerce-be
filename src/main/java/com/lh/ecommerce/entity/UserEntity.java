@@ -1,8 +1,6 @@
 package com.lh.ecommerce.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.*;
 
 @Entity
@@ -12,23 +10,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
-
-  private String username;
+public class UserEntity extends BaseAuditEntity {
   private String password;
-
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @Column(name = "updated_at")
-  private Instant updatedAt;
-
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @Column(name = "updated_by")
-  private UUID updatedBy;
+  private String email;
+  private String firstName;
+  private String lastName;
 }

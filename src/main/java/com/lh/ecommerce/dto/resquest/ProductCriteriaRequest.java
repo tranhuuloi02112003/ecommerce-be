@@ -7,4 +7,8 @@ import lombok.Setter;
 @Setter
 public class ProductCriteriaRequest extends BasePageRequest {
   private String search;
+
+  public String getSearch() {
+    return search != null ? search.trim() : "";
+  }
 }

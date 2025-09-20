@@ -50,14 +50,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       throw SecurityError.invalidToken().get();
     }
 
-    String username = jwtTokenHelper.extractUsername(token);
+    String email = jwtTokenHelper.extractEmail(token);
 
-    if (username != null) {
-      UserEntity userEntity = userService.getUserByUsername(username);
+    if (email != null) {
+      UserEntity userEntity = userService.getUserByEmail(email);
 
       CustomUserPrincipal customUserPrincipal =
           CustomUserPrincipal.builder()
-              .username(username)
+              .email(email)
               .password(userEntity.getPassword())
               .id(userEntity.getId())
               .build();

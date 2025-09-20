@@ -1,7 +1,7 @@
 package com.lh.ecommerce.controller;
 
-import com.lh.ecommerce.dto.response.PagedResponse;
-import com.lh.ecommerce.dto.response.ProductListItemResponse;
+import com.lh.ecommerce.dto.response.PageBaseResponse;
+import com.lh.ecommerce.dto.response.ProductBasicResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
@@ -38,7 +38,7 @@ public class ProductController {
   }
 
   @GetMapping
-  public PagedResponse<ProductListItemResponse> getAll(
+  public PageBaseResponse<ProductBasicResponse> getAll(
       @Valid @ModelAttribute ProductCriteriaRequest criteria) {
     return productService.getAll(criteria);
   }

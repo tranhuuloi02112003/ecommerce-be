@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Session {
   private UUID userId;
-  private String username;
+  private String email;
   private UUID refreshJti;
 }

@@ -31,9 +31,9 @@ public class JwtTokenHelper {
     return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
   }
 
-  public String generateToken(String username) {
+  public String generateToken(String email) {
     return Jwts.builder()
-        .subject(username)
+        .subject(email)
         .id(UUID.randomUUID().toString())
         .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_ACCESS)
         .issuedAt(new Date(System.currentTimeMillis()))
@@ -42,9 +42,9 @@ public class JwtTokenHelper {
         .compact();
   }
 
-  public String generateRefreshToken(String username, UUID jti) {
+  public String generateRefreshToken(String email, UUID jti) {
     return Jwts.builder()
-        .subject(username)
+        .subject(email)
         .id(jti.toString())
         .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_REFRESH)
         .issuedAt(new Date(System.currentTimeMillis()))
@@ -61,7 +61,7 @@ public class JwtTokenHelper {
     return extractClaim(token, Claims::getId);
   }
 
-  public String extractUsername(String token) {
+  public String extractEmail(String token) {
     return extractClaim(token, Claims::getSubject);
   }
 

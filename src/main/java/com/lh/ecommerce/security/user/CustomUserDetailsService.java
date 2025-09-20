@@ -15,12 +15,12 @@ public class CustomUserDetailsService implements UserDetailsService {
   private final UserService userService;
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    UserEntity userEntity = userService.getUserByUsername(username);
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    UserEntity userEntity = userService.getUserByEmail(email);
 
     return CustomUserPrincipal.builder()
         .id(userEntity.getId())
-        .username(username)
+        .email(email)
         .password(userEntity.getPassword())
         .build();
   }
