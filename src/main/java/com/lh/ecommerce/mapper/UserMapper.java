@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-  UserResponse toUsersResponse(UserEntity entity);
+  UserResponse toResponse(UserEntity entity);
 
-  List<UserResponse> toUsersResponseList(List<UserEntity> entities);
+  List<UserResponse> toResponse(List<UserEntity> entities);
 }

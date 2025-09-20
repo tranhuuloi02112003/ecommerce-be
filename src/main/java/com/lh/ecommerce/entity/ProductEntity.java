@@ -15,6 +15,7 @@ public class ProductEntity extends BaseAuditEntity {
   private String name;
   private String description;
   private double price;
+  private int quantity;
 
   @Column(name = "category_id")
   private UUID categoryId;
@@ -36,5 +37,6 @@ public class ProductEntity extends BaseAuditEntity {
     this.categoryId = product.getCategoryId();
     this.mainImage = image;
     this.category = category;
+    this.quantity = product.getQuantity();
   }
 }

@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 public class CustomUserPrincipal implements UserDetails {
   private UUID id;
-  private String username;
+  private String email;
   private String password;
 
   @Override
@@ -27,6 +27,6 @@ public class CustomUserPrincipal implements UserDetails {
 
   @Override
   public String getUsername() {
-    return username;
+    return email;
   }
 }

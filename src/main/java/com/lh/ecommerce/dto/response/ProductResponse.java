@@ -8,7 +8,6 @@ public record ProductResponse(
     String name,
     String description,
     Double price,
+    int quantity,
     UUID categoryId,
-    List<String> imageUrls,
-    List<UUID> colorIds,
-    List<UUID> sizeIds) {}
+    List<String> imageUrls) {}

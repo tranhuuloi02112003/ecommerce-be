@@ -11,5 +11,4 @@ import lombok.*;
 public class CategoryResponse {
   private UUID id;
   private String name;
-  private String description;
 }

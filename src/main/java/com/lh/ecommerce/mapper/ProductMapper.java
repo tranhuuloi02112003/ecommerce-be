@@ -6,7 +6,6 @@ import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.ProductEntity;
 import java.util.List;
-import java.util.UUID;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -43,10 +42,4 @@ public interface ProductMapper {
 
     return new PageBaseResponse<>(productBasicResponses, pageData);
   }
-
-  @Mapping(target = "imageUrls", expression = "java(imageUrls)")
-  @Mapping(target = "colorIds", expression = "java(colorIds)")
-  @Mapping(target = "sizeIds", expression = "java(sizeIds)")
-  ProductResponse toResponse(
-      ProductEntity entity, List<String> imageUrls, List<UUID> colorIds, List<UUID> sizeIds);
 }

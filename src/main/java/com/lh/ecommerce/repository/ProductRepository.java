@@ -17,7 +17,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
         JOIN ImageEntity i ON p.id = i.productId
         WHERE (p.name ILIKE CONCAT('%', :search, '%')
                 OR p.description ILIKE CONCAT('%', :search, '%')
-                OR c.name ILIKE CONCAT('%', :search, '%'))
+                OR c.name ILIKE CONCAT('%', :search, '%')) and i.isMain=true
         """)
   Page<ProductEntity> search(String search, Pageable pageable);
 }

@@ -6,7 +6,6 @@ import com.lh.ecommerce.mapper.UserMapper;
 import com.lh.ecommerce.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,12 +16,10 @@ public class UserService {
 
   public List<UserResponse> getAllUser() {
     List<UserEntity> userEntities = userRepository.findAll();
-    return userMapper.toUsersResponseList(userEntities);
+    return userMapper.toResponse(userEntities);
   }
 
-  public UserEntity getUserByUsername(String username) {
-    return userRepository
-        .findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException(username));
+  public UserEntity getUserByEmail(String email) {
+    return userRepository.findByEmail(email).orElseThrow(UserError.userNotFound());
   }
 }
