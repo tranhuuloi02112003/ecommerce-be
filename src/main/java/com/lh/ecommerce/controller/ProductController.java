@@ -24,12 +24,12 @@ public class ProductController {
     return productService.create(productRequest);
   }
 
-  @PutMapping("/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  public ProductResponse updateProduct(
-      @PathVariable UUID id, @RequestBody ProductRequest productRequest) {
-    return productService.update(id, productRequest);
-  }
+  //  @PutMapping("/{id}")
+  //  @ResponseStatus(HttpStatus.OK)
+  //  public ProductResponse updateProduct(
+  //      @PathVariable UUID id, @RequestBody ProductRequest productRequest) {
+  //    return productService.update(id, productRequest);
+  //  }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)

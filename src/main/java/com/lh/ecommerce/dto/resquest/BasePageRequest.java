@@ -12,7 +12,7 @@ public class BasePageRequest {
   private int page = 0;
 
   @Min(1)
-  @Max(200)
+  @Max(50)
   private int size;
 
   public Pageable getPageable() {
@@ -20,7 +20,7 @@ public class BasePageRequest {
   }
 
   private int getSize() {
-    return size < 10 ? 10 : size;
+    return size < 5 ? 7 : size;
   }
 
   private int getPage() {

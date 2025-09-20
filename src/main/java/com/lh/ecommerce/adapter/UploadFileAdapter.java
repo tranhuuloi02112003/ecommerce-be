@@ -1,9 +1,11 @@
 package com.lh.ecommerce.adapter;
 
 import java.time.Duration;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -12,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
+@Component
 @RequiredArgsConstructor
 public class UploadFileAdapter {
 
@@ -43,5 +46,9 @@ public class UploadFileAdapter {
             .getObjectRequest(getObjectRequest)
             .build();
     return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
+  }
+
+  public List<String> uploadMultipleFiles(List<MultipartFile> files) {
+    return files.stream().map(this::uploadFile).toList();
   }
 }

@@ -7,7 +7,9 @@ import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.*;
 import com.lh.ecommerce.mapper.ImageMapper;
+import com.lh.ecommerce.mapper.ProductColorMapper;
 import com.lh.ecommerce.mapper.ProductMapper;
+import com.lh.ecommerce.mapper.ProductSizeMapper;
 import com.lh.ecommerce.repository.*;
 import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.service.color.ColorError;
@@ -33,36 +35,38 @@ public class ProductService {
   private final ImageRepository imageRepository;
   private final ProductMapper productMapper;
   private final ImageMapper imageMapper;
+  private final ProductColorMapper productColorMapper;
+  private final ProductSizeMapper productSizeMapper;
 
   @Transactional
   public ProductResponse create(ProductRequest request) {
-      validateCategory(request.categoryId());
-      validateColors(request.colorIds());
-      validateSizes(request.sizeIds());
+    validateCategory(request.categoryId());
+    validateColors(request.colorIds());
+    validateSizes(request.sizeIds());
 
     ProductEntity productEntity = productRepository.save(productMapper.toEntity(request));
 
-    upsertImages(productEntity.getId(), request.imageUrls(), false);
-      insertColors(productEntity.getId(), request.colorIds());
-    upsertSizes(productEntity.getId(), request.sizeIds(), false);
+    insertImages(productEntity.getId(), request.imageUrls());
+    insertColors(productEntity.getId(), request.colorIds());
+    insertSizes(productEntity.getId(), request.sizeIds());
 
     return productMapper.toResponse(productEntity, request.imageUrls());
   }
 
-  @Transactional
-  public ProductResponse update(UUID id, ProductRequest request) {
-    final var productEntity = validProduct(id);
-    validateRefs(request);
-
-    productMapper.toEntity(request, productEntity);
-    ProductEntity saved = productRepository.save(productEntity);
-
-    upsertImages(saved.getId(), request.imageUrls(), true);
-//    upsertColors(saved.getId(), request.colorIds(), true);
-    upsertSizes(saved.getId(), request.sizeIds(), true);
-
-    return productMapper.toResponse(saved, request.imageUrls());
-  }
+  //  @Transactional
+  //  public ProductResponse update(UUID id, ProductRequest request) {
+  //    final var productEntity = validProduct(id);
+  //    validateRefs(request);
+  //
+  //    productMapper.toEntity(request, productEntity);
+  //    ProductEntity saved = productRepository.save(productEntity);
+  //
+  //    insertImages(saved.getId(), request.imageUrls(), true);
+  //    //    upsertColors(saved.getId(), request.colorIds(), true);
+  //    insertSizes(saved.getId(), request.sizeIds(), true);
+  //
+  //    return productMapper.toResponse(saved, request.imageUrls());
+  //  }
 
   @Transactional
   public void delete(UUID id) {
@@ -88,21 +92,7 @@ public class ProductService {
     List<UUID> colorIds = productColorRepository.findColorIdsByProductId(id);
     List<UUID> sizeIds = productSizeRepository.findSizeIdByProductId(id);
 
-    return new ProductResponse(
-        product.getId(),
-        product.getName(),
-        product.getDescription(),
-        product.getPrice(),
-        product.getCategoryId(),
-        imageUrls,
-        colorIds,
-        sizeIds);
-  }
-
-  private void validateRefs(ProductRequest request) {
-    validateCategory(request.categoryId());
-    validateColors(request.colorIds());
-    validateSizes(request.sizeIds());
+    return productMapper.toResponse(product, imageUrls, colorIds, sizeIds);
   }
 
   private void validateCategory(UUID categoryId) {
@@ -114,50 +104,39 @@ public class ProductService {
   private void validateColors(List<UUID> colorIds) {
     if (CollectionUtils.isEmpty(colorIds)) return;
 
-    List<ColorEntity> colors = colorRepository.findAllById(colorIds);
-
-    if (colors.size() != colorIds.size()) {
+    long countColors = colorRepository.countByIdIn(colorIds);
+    if (countColors != colorIds.size()) {
       throw ColorError.colorNotFound().get();
     }
   }
 
   private void validateSizes(List<UUID> sizeIds) {
     if (CollectionUtils.isEmpty(sizeIds)) return;
+
     long count = sizeRepository.countByIdIn(sizeIds);
     if (count != sizeIds.size()) {
       throw SizeError.sizeNotFound().get();
     }
   }
 
-  private void upsertImages(UUID productId, List<String> imageUrls, boolean replace) {
-    if (replace) {
-      imageRepository.deleteByProductId(productId);
+  private void insertImages(UUID productId, List<String> imageUrls) {
+    if (CollectionUtils.isEmpty(imageUrls)) {
+      return;
     }
-    if (!CollectionUtils.isEmpty(imageUrls)) {
-      List<ImageEntity> images = imageMapper.toEntity(imageUrls, productId);
-      imageRepository.saveAll(images);
-    }
+    imageRepository.saveAll(imageMapper.toEntity(imageUrls, productId));
   }
 
   private void insertColors(UUID productId, List<UUID> colorIds) {
     if (CollectionUtils.isEmpty(colorIds)) {
       return;
     }
-
-    List<ProductColorEntity> list =
-        colorIds.stream().map(id -> new ProductColorEntity(null, productId, id)).toList();
-    productColorRepository.saveAll(list);
+    productColorRepository.saveAll(productColorMapper.toEntity(colorIds, productId));
   }
 
-  private void upsertSizes(UUID productId, List<UUID> sizeIds, boolean replace) {
-    if (replace) {
-      productSizeRepository.deleteByProductId(productId);
-      productColorRepository.flush();
+  private void insertSizes(UUID productId, List<UUID> sizeIds) {
+    if (CollectionUtils.isEmpty(sizeIds)) {
+      return;
     }
-    if (!CollectionUtils.isEmpty(sizeIds)) {
-      List<ProductSizeEntity> list =
-          sizeIds.stream().map(sid -> new ProductSizeEntity(null, productId, sid)).toList();
-      productSizeRepository.saveAll(list);
-    }
+    productSizeRepository.saveAll(productSizeMapper.toEntity(sizeIds, productId));
   }
 }
