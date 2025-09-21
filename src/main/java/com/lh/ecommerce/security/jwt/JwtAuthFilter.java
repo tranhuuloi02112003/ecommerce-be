@@ -1,7 +1,7 @@
 package com.lh.ecommerce.security.jwt;
 
 import com.lh.ecommerce.entity.UserEntity;
-import com.lh.ecommerce.repository.redis.RedisRepository;
+import com.lh.ecommerce.repository.RedisRepository;
 import com.lh.ecommerce.security.SecurityError;
 import com.lh.ecommerce.security.user.CustomUserPrincipal;
 import com.lh.ecommerce.service.user.UserService;
@@ -21,7 +21,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
   private static final String BEARER_PREFIX = "Bearer ";
-  private static final String TOKEN_TYPE_ACCESS = "access";
 
   private final UserService userService;
   private final JwtTokenHelper jwtTokenHelper;
@@ -32,22 +31,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+
     if (bearerToken == null || !bearerToken.startsWith(BEARER_PREFIX)) {
       filterChain.doFilter(request, response);
       return;
     }
 
     String token = bearerToken.replace(BEARER_PREFIX, "");
-    String tokenType = jwtTokenHelper.extractTokenType(token);
-
-    if (!TOKEN_TYPE_ACCESS.equals(tokenType)) {
-      throw SecurityError.invalidToken().get();
-    }
+    jwtTokenHelper.isAccessToken(token);
 
     String jti = jwtTokenHelper.extractJti(token);
-
     if (redisRepository.isAccessJtiBlacklisted(jti)) {
-      throw SecurityError.invalidToken().get();
+      throw SecurityError.logoutToken().get();
     }
 
     String email = jwtTokenHelper.extractEmail(token);

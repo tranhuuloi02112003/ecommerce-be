@@ -1,8 +1,9 @@
 package com.lh.ecommerce.security.jwt;
 
+import com.lh.ecommerce.exception.HttpException;
+import com.lh.ecommerce.security.SecurityError;
 import com.lh.ecommerce.utils.DateUtils;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -53,8 +54,18 @@ public class JwtTokenHelper {
         .compact();
   }
 
-  public String extractTokenType(String token) {
-    return extractAllClaims(token).get(CLAIM_TOKEN_TYPE, String.class);
+  public void isAccessToken(String token) throws HttpException {
+    String type = extractTokenType(token);
+    if (!TOKEN_TYPE_ACCESS.equalsIgnoreCase(type)) {
+      throw SecurityError.invalidTokenType().get();
+    }
+  }
+
+  public void isRefreshToken(String token) throws HttpException {
+    String type = extractTokenType(token);
+    if (!TOKEN_TYPE_REFRESH.equalsIgnoreCase(type)) {
+      throw SecurityError.invalidTokenType().get();
+    }
   }
 
   public String extractJti(String token) {
@@ -70,11 +81,24 @@ public class JwtTokenHelper {
   }
 
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-    final Claims claims = extractAllClaims(token);
+    final Claims claims = safeExtractAllClaims(token);
     return claimsResolver.apply(claims);
   }
 
-  private Claims extractAllClaims(String token) {
-    return Jwts.parser().verifyWith(getSignInKey()).build().parseSignedClaims(token).getPayload();
+  private Claims safeExtractAllClaims(String token) throws HttpException {
+    if (token == null || token.isBlank()) {
+      throw SecurityError.tokenNotFound().get();
+    }
+    try {
+      return Jwts.parser().verifyWith(getSignInKey()).build().parseSignedClaims(token).getPayload();
+    } catch (ExpiredJwtException e) {
+      throw SecurityError.expiredToken().get();
+    } catch (JwtException | IllegalArgumentException e) {
+      throw SecurityError.invalidToken().get();
+    }
+  }
+
+  private String extractTokenType(String token) {
+    return safeExtractAllClaims(token).get(CLAIM_TOKEN_TYPE, String.class);
   }
 }
