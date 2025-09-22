@@ -12,5 +12,4 @@ import lombok.*;
 @Builder
 public class CategoryEntity extends BaseAuditEntity {
   private String name;
-  private String description;
 }

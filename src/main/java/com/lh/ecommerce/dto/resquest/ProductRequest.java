@@ -10,7 +10,6 @@ public record ProductRequest(
     @NotBlank String name,
     @NotBlank String description,
     @NotNull(message = "Price is required") double price,
+    @NotNull(message = "Quantity is required") int quantity,
     @NotNull(message = "CategoryId is required") UUID categoryId,
-    @NotEmpty(message = "Image URLs must not be empty") List<@NotBlank String> imageUrls,
-    List<UUID> colorIds,
-    List<UUID> sizeIds) {}
+    @NotEmpty(message = "Image URLs must not be empty") List<@NotBlank String> imageUrls) {}

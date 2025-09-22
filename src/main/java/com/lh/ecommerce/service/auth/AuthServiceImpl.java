@@ -32,20 +32,19 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public TokenResponse login(LoginRequest request) {
     authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-    String accessToken = jwtTokenHelper.generateToken(request.getUsername());
+    String accessToken = jwtTokenHelper.generateToken(request.getEmail());
     UUID jtiRefreshToken = UUID.randomUUID();
-    String refreshToken =
-        jwtTokenHelper.generateRefreshToken(request.getUsername(), jtiRefreshToken);
+    String refreshToken = jwtTokenHelper.generateRefreshToken(request.getEmail(), jtiRefreshToken);
 
-    UserEntity user = userService.getUserByUsername(request.getUsername());
+    UserEntity user = userService.getUserByEmail(request.getEmail());
 
     Session session =
         Session.builder()
             .refreshJti(jtiRefreshToken)
             .userId(user.getId())
-            .username(user.getUsername())
+            .email(user.getEmail())
             .build();
 
     redisRepository.saveSession(session);
@@ -83,9 +82,9 @@ public class AuthServiceImpl implements AuthService {
       throw new BadCredentialsException("Invalid token type");
     }
 
-    String username = jwtTokenHelper.extractUsername(refresh);
+    String email = jwtTokenHelper.extractEmail(refresh);
     String jtiRefreshToken = jwtTokenHelper.extractJti(refresh);
-    UserEntity user = userService.getUserByUsername(username);
+    UserEntity user = userService.getUserByEmail(email);
     if (jtiRefreshToken == null || jtiRefreshToken.isBlank()) {
       throw new BadCredentialsException("Invalid refresh token id");
     }
@@ -95,14 +94,14 @@ public class AuthServiceImpl implements AuthService {
     }
     redisRepository.deleteByRefreshJti(jtiRefreshToken);
 
-    String accessToken = jwtTokenHelper.generateToken(username);
+    String accessToken = jwtTokenHelper.generateToken(email);
     UUID jtiRefreshTokenNew = UUID.randomUUID();
-    String refreshToken = jwtTokenHelper.generateRefreshToken(username, jtiRefreshTokenNew);
+    String refreshToken = jwtTokenHelper.generateRefreshToken(email, jtiRefreshTokenNew);
     Session session =
         Session.builder()
             .refreshJti(jtiRefreshTokenNew)
             .userId(user.getId())
-            .username(user.getUsername())
+            .email(user.getEmail())
             .build();
     redisRepository.saveSession(session);
     return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();

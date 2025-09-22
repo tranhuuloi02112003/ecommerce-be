@@ -1,6 +1,5 @@
 package com.lh.ecommerce.dto.response;
 
-import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserResponse {
   private UUID id;
-  private String username;
-  private Instant createdAt;
-  private Instant updatedAt;
+  private String email;
+  private String firstName;
+  private String lastName;
 }
