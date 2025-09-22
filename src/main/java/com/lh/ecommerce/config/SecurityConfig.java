@@ -23,7 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
   private static final String[] WHITE_LIST = {
-    "/api/auth/token", "/api/auth/logout", "/api/auth/refresh-token", "api/products"
+    "/api/auth/token", "/api/auth/logout", "/api/auth/refresh-token"
   };
 
   @Autowired private JwtAuthFilter authFilter;
@@ -35,7 +35,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             auth -> auth.requestMatchers(WHITE_LIST).permitAll().anyRequest().authenticated())
         .formLogin(AbstractHttpConfigurer::disable)
-        .httpBasic(Customizer.withDefaults())
+        .httpBasic(AbstractHttpConfigurer::disable)
         .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
