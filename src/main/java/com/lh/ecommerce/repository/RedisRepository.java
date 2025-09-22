@@ -1,4 +1,4 @@
-package com.lh.ecommerce.repository.redis;
+package com.lh.ecommerce.repository;
 
 import com.lh.ecommerce.dto.response.Session;
 import java.time.Duration;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class RedisRepositoryImpl implements RedisRepository {
+public class RedisRepository {
   private final RedisTemplate<String, Object> redis;
 
   @Value("${spring.security.refresh-minutes}")
@@ -23,17 +23,14 @@ public class RedisRepositoryImpl implements RedisRepository {
     return "sess:" + refreshJti;
   }
 
-  @Override
   public void blacklistAccessJti(String tokenId, Duration ttl) {
     redis.opsForValue().set(blAtkKey(tokenId), "1", ttl);
   }
 
-  @Override
   public boolean isAccessJtiBlacklisted(String tokenId) {
     return redis.hasKey(blAtkKey(tokenId));
   }
 
-  @Override
   public void saveSession(Session session) {
     redis
         .opsForValue()
@@ -43,13 +40,7 @@ public class RedisRepositoryImpl implements RedisRepository {
             Duration.ofMinutes(refreshMinutes));
   }
 
-  @Override
   public boolean existsByRefreshJti(String refreshJti) {
     return redis.hasKey(sessionKey(refreshJti));
-  }
-
-  @Override
-  public void deleteByRefreshJti(String refreshJti) {
-    redis.delete(sessionKey(refreshJti));
   }
 }
