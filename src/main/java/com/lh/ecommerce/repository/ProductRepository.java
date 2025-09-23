@@ -12,7 +12,8 @@ import org.springframework.stereotype.Repository;
 public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   @Query(
       """
-        SELECT NEW ProductEntity(p, i, c) FROM ProductEntity p
+        SELECT NEW ProductEntity(p, i, c)
+        FROM ProductEntity p
         JOIN CategoryEntity c ON p.categoryId = c.id
         JOIN ImageEntity i ON p.id = i.productId
         WHERE (p.name ILIKE CONCAT('%', :search, '%')
