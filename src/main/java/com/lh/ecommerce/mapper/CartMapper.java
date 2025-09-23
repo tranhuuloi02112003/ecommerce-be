@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface CartMapper {
+  CartResponse toResponse(CartEntity entity);
+
   default List<CartResponse> toResponse(List<CartEntity> cartEntities) {
     return cartEntities.stream()
         .map(

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,5 +29,11 @@ public class CartController {
   @DeleteMapping("/{id}")
   public List<CartResponse> delete(@PathVariable("id") UUID productId) {
     return cartService.removeItem(productId);
+  }
+
+  @PostMapping("/{productId}")
+  @ResponseStatus(HttpStatus.CREATED)
+  public CartResponse addToCart(@PathVariable UUID productId) {
+    return cartService.addToCart(productId);
   }
 }
