@@ -9,18 +9,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CartError implements Error {
-  DUPLICATE_PRODUCT_IDS("Duplicate productId(s) in request"),
   PRODUCT_NOT_IN_CART("Product is not in user's cart"),
-  QUANTITY_EXCEEDS_STOCK("Requested quantity exceeds available stock"),
+  QUANTITY_EXCEEDS_STOCK("Requested quantity exceeds available stock");
   private final String message;
 
   @Override
   public String getName() {
     return name();
-  }
-
-  public static Supplier<BadRequestException> duplicateProductIds() {
-    return () -> new BadRequestException(DUPLICATE_PRODUCT_IDS);
   }
 
   public static Supplier<BadRequestException> productNotInCart() {
