@@ -2,6 +2,7 @@ package com.lh.ecommerce.service.product;
 
 import com.lh.ecommerce.dto.response.PageBaseResponse;
 import com.lh.ecommerce.dto.response.ProductBasicResponse;
+import com.lh.ecommerce.dto.response.ProductHomeResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +80,11 @@ public class ProductService {
 
     List<String> imageUrls = imageRepository.findUrlsByProductId(id);
     return productMapper.toResponse(product, imageUrls);
+  }
+
+  public List<ProductHomeResponse> getExploreProducts() {
+    List<ProductEntity> products = productRepository.getExploreProducts(PageRequest.of(0, 15));
+    return productMapper.toProductHomeResponse(products);
   }
 
   private void validateCategory(UUID categoryId) {

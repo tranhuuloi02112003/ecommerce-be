@@ -1,6 +1,7 @@
 package com.lh.ecommerce.repository;
 
 import com.lh.ecommerce.entity.ProductEntity;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
                 OR c.name ILIKE CONCAT('%', :search, '%')) and i.isMain=true
         """)
   Page<ProductEntity> search(String search, Pageable pageable);
+
+  @Query(
+      """
+     select new ProductEntity(p, i)
+     from ProductEntity p
+     join ImageEntity i on p.id = i.productId
+     where i.isMain = true
+     order by p.createdAt desc
+""")
+  List<ProductEntity> getExploreProducts(Pageable pageable);
 }

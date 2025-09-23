@@ -2,9 +2,12 @@ package com.lh.ecommerce.mapper;
 
 import com.lh.ecommerce.dto.response.PageBaseResponse;
 import com.lh.ecommerce.dto.response.ProductBasicResponse;
+import com.lh.ecommerce.dto.response.ProductHomeResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.ProductEntity;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -41,5 +44,22 @@ public interface ProductMapper {
             .toList();
 
     return new PageBaseResponse<>(productBasicResponses, pageData);
+  }
+
+  default List<ProductHomeResponse> toProductHomeResponse(List<ProductEntity> productEntities) {
+    final Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
+    return productEntities.stream()
+        .map(
+            productEntity ->
+                ProductHomeResponse.builder()
+                    .id(productEntity.getId())
+                    .price(productEntity.getPrice())
+                    .name(productEntity.getName())
+                    .mainImage(productEntity.getMainImage().getUrl())
+                    .isNew(
+                        productEntity.getCreatedAt() != null
+                            && productEntity.getCreatedAt().isAfter(threshold))
+                    .build())
+        .toList();
   }
 }
