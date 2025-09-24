@@ -1,10 +1,13 @@
 package com.lh.ecommerce.controller;
 
 import com.lh.ecommerce.dto.response.AccessTokenResponse;
+import com.lh.ecommerce.dto.response.UserResponse;
 import com.lh.ecommerce.dto.resquest.LoginRequest;
+import com.lh.ecommerce.dto.resquest.RegisterRequest;
 import com.lh.ecommerce.service.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,5 +37,11 @@ public class AuthController {
   public AccessTokenResponse refreshToken(
       HttpServletRequest request, HttpServletResponse response) {
     return authService.refresh(request, response);
+  }
+
+  @PostMapping("/register")
+  @ResponseStatus(HttpStatus.CREATED)
+  public UserResponse register(@Valid @RequestBody RegisterRequest request) {
+    return authService.register(request);
   }
 }

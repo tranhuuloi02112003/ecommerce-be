@@ -3,8 +3,11 @@ package com.lh.ecommerce.service.auth;
 import com.lh.ecommerce.adapter.CookieAdapter;
 import com.lh.ecommerce.dto.response.AccessTokenResponse;
 import com.lh.ecommerce.dto.response.Session;
+import com.lh.ecommerce.dto.response.UserResponse;
 import com.lh.ecommerce.dto.resquest.LoginRequest;
+import com.lh.ecommerce.dto.resquest.RegisterRequest;
 import com.lh.ecommerce.entity.UserEntity;
+import com.lh.ecommerce.mapper.UserMapper;
 import com.lh.ecommerce.repository.RedisRepository;
 import com.lh.ecommerce.repository.UserRepository;
 import com.lh.ecommerce.security.SecurityError;
@@ -18,6 +21,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
   private static final String BEARER_PREFIX = "Bearer ";
 
+  private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JwtTokenHelper jwtTokenHelper;
   private final RedisRepository redisRepository;
   private final UserRepository userRepository;
   private final CookieAdapter cookieService;
+  private final UserMapper userMapper;
 
   @Transactional
   public AccessTokenResponse login(LoginRequest request, HttpServletResponse response) {
@@ -89,6 +95,20 @@ public class AuthService {
 
     cookieService.setRefreshTokenCookie(response, refresh);
     return AccessTokenResponse.builder().accessToken(accessToken).build();
+  }
+
+  @Transactional
+  public UserResponse register(RegisterRequest request) {
+    if (userRepository.existsByEmail(request.getEmail())) {
+      throw UserError.emailAlreadyExists().get();
+    }
+
+    UserEntity user = userMapper.toUserEntity(request);
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+    UserEntity saved = userRepository.save(user);
+
+    return userMapper.toResponse(saved);
   }
 
   private void validateRefreshToken(String email, String jtiRefreshToken) {
