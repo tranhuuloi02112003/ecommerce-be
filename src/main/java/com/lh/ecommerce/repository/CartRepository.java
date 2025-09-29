@@ -27,7 +27,7 @@ public interface CartRepository extends JpaRepository<CartEntity, UUID> {
   @Modifying
   @Query(
       value =
-        """
+          """
         UPDATE carts c
         SET quantity = :quantity
         FROM products p

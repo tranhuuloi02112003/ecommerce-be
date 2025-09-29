@@ -23,7 +23,7 @@ public class CartService {
   public List<CartResponse> findByUserId() {
     UUID userId = SecurityUtils.getCurrentUserId();
     userRepository.findById(userId).orElseThrow(UserError.userNotFound());
-    return cartMapper.toResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
   }
 
   @Transactional
@@ -42,7 +42,7 @@ public class CartService {
       throw CartError.quantityExceedsStock().get();
     }
 
-    return cartMapper.toResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
   }
 
   @Transactional
@@ -55,6 +55,6 @@ public class CartService {
       throw CartError.productNotInCart().get();
     }
 
-    return cartMapper.toResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
   }
 }
