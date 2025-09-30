@@ -42,7 +42,7 @@ public class UploadFileAdapter {
 
     GetObjectPresignRequest getObjectPresignRequest =
         GetObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(10))
+            .signatureDuration(Duration.ofDays(7))
             .getObjectRequest(getObjectRequest)
             .build();
     return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();

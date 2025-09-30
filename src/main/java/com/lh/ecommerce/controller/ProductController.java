@@ -2,11 +2,13 @@ package com.lh.ecommerce.controller;
 
 import com.lh.ecommerce.dto.response.PageBaseResponse;
 import com.lh.ecommerce.dto.response.ProductBasicResponse;
+import com.lh.ecommerce.dto.response.ProductHomeResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.service.product.ProductService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,5 +48,10 @@ public class ProductController {
   @GetMapping("/{id}")
   public ProductResponse getById(@PathVariable("id") UUID productId) {
     return productService.getById(productId);
+  }
+
+  @GetMapping("/explore")
+  public List<ProductHomeResponse> getExploreProducts() {
+    return productService.getExploreProducts();
   }
 }
