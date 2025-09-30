@@ -46,11 +46,11 @@ public class CartService {
   }
 
   @Transactional
-  public List<CartResponse> removeItem(UUID productId) {
+  public List<CartResponse> removeCartByProductId(UUID productId) {
     UUID userId = SecurityUtils.getCurrentUserId();
     userRepository.findById(userId).orElseThrow(UserError.userNotFound());
 
-    int deleted = cartRepository.deleteOne(userId, productId);
+    int deleted = cartRepository.deleteByUserIdAndProductId(userId, productId);
     if (deleted == 0) {
       throw CartError.productNotInCart().get();
     }
