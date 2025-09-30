@@ -2,9 +2,12 @@ package com.lh.ecommerce.service.cart;
 
 import com.lh.ecommerce.dto.response.CartResponse;
 import com.lh.ecommerce.dto.resquest.CartRequest;
+import com.lh.ecommerce.entity.CartEntity;
 import com.lh.ecommerce.mapper.CartMapper;
 import com.lh.ecommerce.repository.CartRepository;
+import com.lh.ecommerce.repository.ProductRepository;
 import com.lh.ecommerce.repository.UserRepository;
+import com.lh.ecommerce.service.product.ProductError;
 import com.lh.ecommerce.service.user.UserError;
 import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.*;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CartService {
   private final CartRepository cartRepository;
   private final UserRepository userRepository;
+  private final ProductRepository productRepository;
   private final CartMapper cartMapper;
 
   public List<CartResponse> findByUserId() {
@@ -56,5 +60,29 @@ public class CartService {
     }
 
     return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
+  }
+
+  @Transactional
+  public CartResponse addToCart(UUID productId) {
+    UUID userId = SecurityUtils.getCurrentUserId();
+    userRepository.findById(userId).orElseThrow(UserError.userNotFound());
+
+    if (!productRepository.existsById(productId)) {
+      throw ProductError.productNotFound().get();
+    }
+
+    CartEntity cart =
+        cartRepository
+            .findByUserIdAndProductId(userId, productId)
+            .map(
+                c -> {
+                  c.setQuantity(c.getQuantity() + 1);
+                  return c;
+                })
+            .orElseGet(
+                () -> CartEntity.builder().productId(productId).userId(userId).quantity(1).build());
+
+    CartEntity saved = cartRepository.save(cart);
+    return cartMapper.toCartResponse(saved);
   }
 }

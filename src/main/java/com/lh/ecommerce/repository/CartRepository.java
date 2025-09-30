@@ -2,6 +2,7 @@ package com.lh.ecommerce.repository;
 
 import com.lh.ecommerce.entity.CartEntity;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -42,4 +43,6 @@ public interface CartRepository extends JpaRepository<CartEntity, UUID> {
   @Query(
       "SELECT COUNT(c)>0 FROM CartEntity c WHERE c.userId = :userId AND c.productId = :productId")
   boolean existsByUserIdAndProductId(UUID userId, UUID productId);
+
+  Optional<CartEntity> findByUserIdAndProductId(UUID userId, UUID productId);
 }
