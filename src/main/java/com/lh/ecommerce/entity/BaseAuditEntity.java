@@ -40,4 +40,14 @@ public abstract class BaseAuditEntity {
   @LastModifiedBy
   @Column(name = "updated_by")
   private UUID updatedBy;
+
+  @PrePersist
+  protected void prePersistSelfAudit() {
+    if (this.createdBy == null && this.getId() != null) {
+      this.createdBy = this.getId();
+    }
+    if (this.updatedBy == null && this.getId() != null) {
+      this.updatedBy = this.getId();
+    }
+  }
 }
