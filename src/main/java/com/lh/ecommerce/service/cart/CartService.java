@@ -27,7 +27,7 @@ public class CartService {
   public List<CartResponse> findByUserId() {
     UUID userId = SecurityUtils.getCurrentUserId();
     userRepository.findById(userId).orElseThrow(UserError.userNotFound());
-    return cartMapper.toResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
   }
 
   @Transactional
@@ -46,20 +46,20 @@ public class CartService {
       throw CartError.quantityExceedsStock().get();
     }
 
-    return cartMapper.toResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
   }
 
   @Transactional
-  public List<CartResponse> removeItem(UUID productId) {
+  public List<CartResponse> removeCartByProductId(UUID productId) {
     UUID userId = SecurityUtils.getCurrentUserId();
     userRepository.findById(userId).orElseThrow(UserError.userNotFound());
 
-    int deleted = cartRepository.deleteOne(userId, productId);
+    int deleted = cartRepository.deleteByUserIdAndProductId(userId, productId);
     if (deleted == 0) {
       throw CartError.productNotInCart().get();
     }
 
-    return cartMapper.toResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
   }
 
   @Transactional
@@ -74,12 +74,15 @@ public class CartService {
     CartEntity cart =
         cartRepository
             .findByUserIdAndProductId(userId, productId)
+            .map(
+                c -> {
+                  c.setQuantity(c.getQuantity() + 1);
+                  return c;
+                })
             .orElseGet(
-                () -> CartEntity.builder().productId(productId).userId(userId).quantity(0).build());
-
-    cart.setQuantity(cart.getQuantity() + 1);
+                () -> CartEntity.builder().productId(productId).userId(userId).quantity(1).build());
 
     CartEntity saved = cartRepository.save(cart);
-    return cartMapper.toResponse(saved);
+    return cartMapper.toCartResponse(saved);
   }
 }

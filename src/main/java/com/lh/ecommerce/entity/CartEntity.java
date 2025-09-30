@@ -24,15 +24,15 @@ public class CartEntity {
   @Column(name = "product_id")
   private UUID productId;
 
-  @Transient private ProductEntity productEntity;
-  @Transient private ImageEntity imageEntity;
+  @Transient private ProductEntity product;
+  @Transient private ImageEntity image;
 
   CartEntity(CartEntity cartEntity, ProductEntity productEntity, ImageEntity imageEntity) {
     this.id = cartEntity.getId();
     this.quantity = cartEntity.getQuantity();
     this.userId = cartEntity.getUserId();
     this.productId = productEntity.getId();
-    this.productEntity = productEntity;
-    this.imageEntity = imageEntity;
+    this.product = productEntity;
+    this.image = imageEntity;
   }
 }

@@ -28,7 +28,7 @@ public class CartController {
 
   @DeleteMapping("/{id}")
   public List<CartResponse> delete(@PathVariable("id") UUID productId) {
-    return cartService.removeItem(productId);
+    return cartService.removeCartByProductId(productId);
   }
 
   @PostMapping("/{productId}")
