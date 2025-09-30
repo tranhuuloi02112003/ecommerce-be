@@ -14,4 +14,5 @@ public class ProductHomeResponse {
   private double price;
   private String mainImage;
   private boolean isNew;
+  private boolean isWish;
 }

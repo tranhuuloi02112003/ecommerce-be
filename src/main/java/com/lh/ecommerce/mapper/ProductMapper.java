@@ -59,6 +59,7 @@ public interface ProductMapper {
                     .isNew(
                         productEntity.getCreatedAt() != null
                             && productEntity.getCreatedAt().isAfter(threshold))
+                    .isWish(productEntity.isWished())
                     .build())
         .toList();
   }

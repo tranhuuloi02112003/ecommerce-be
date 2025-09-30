@@ -25,11 +25,12 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
   @Query(
       """
-     select new ProductEntity(p, i)
+     select new ProductEntity(p, i, case when w.id is not null then true else false end)
      from ProductEntity p
      join ImageEntity i on p.id = i.productId
+      left join WishEntity w on w.productId = p.id and w.userId = :userId
      where i.isMain = true
      order by p.createdAt desc
 """)
-  List<ProductEntity> getExploreProducts(Pageable pageable);
+  List<ProductEntity> getExploreProducts(UUID userId, Pageable pageable);
 }

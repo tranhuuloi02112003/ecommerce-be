@@ -24,6 +24,8 @@ public class ProductEntity extends BaseAuditEntity {
 
   @Transient private CategoryEntity category;
 
+  @Transient private boolean wished;
+
   ProductEntity(ProductEntity product, ImageEntity image, CategoryEntity category) {
     super(
         product.getId(),
@@ -53,5 +55,21 @@ public class ProductEntity extends BaseAuditEntity {
     this.categoryId = product.getCategoryId();
     this.mainImage = image;
     this.quantity = product.getQuantity();
+  }
+
+  public ProductEntity(ProductEntity product, ImageEntity image, boolean wished) {
+    super(
+        product.getId(),
+        product.getCreatedAt(),
+        product.getUpdatedAt(),
+        product.getCreatedBy(),
+        product.getUpdatedBy());
+    this.name = product.getName();
+    this.description = product.getDescription();
+    this.price = product.getPrice();
+    this.quantity = product.getQuantity();
+    this.categoryId = product.getCategoryId();
+    this.mainImage = image;
+    this.wished = wished;
   }
 }

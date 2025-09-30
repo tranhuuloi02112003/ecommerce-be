@@ -12,6 +12,7 @@ import com.lh.ecommerce.mapper.ProductMapper;
 import com.lh.ecommerce.repository.*;
 import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.service.image.ImageError;
+import com.lh.ecommerce.utils.SecurityUtils;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class ProductService {
   private final ProductRepository productRepository;
   private final CategoryRepository categoryRepository;
   private final ImageRepository imageRepository;
+  private final UserRepository userRepository;
   private final ProductMapper productMapper;
   private final ImageMapper imageMapper;
 
@@ -83,7 +85,10 @@ public class ProductService {
   }
 
   public List<ProductHomeResponse> getExploreProducts() {
-    List<ProductEntity> products = productRepository.getExploreProducts(PageRequest.of(0, 15));
+    UUID userId = SecurityUtils.getCurrentUserId();
+
+    List<ProductEntity> products =
+        productRepository.getExploreProducts(userId, PageRequest.of(0, 15));
     return productMapper.toProductHomeResponse(products);
   }
 
