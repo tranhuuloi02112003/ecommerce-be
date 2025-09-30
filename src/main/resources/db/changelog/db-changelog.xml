@@ -17,4 +17,5 @@
    <include file="db/changelog/changeset/11-alter-users-add-email-names-remove-username-20250919.xml"/>
    <include file="db/changelog/changeset/12-alter-products-add-quantity-20250920.xml"/>
    <include file="db/changelog/changeset/13-create-carts-table-20250920.xml"/>
+   <include file="db/changelog/changeset/14-alter-carts-unique-user-product-20250921.xml"/>
 </databaseChangeLog>
