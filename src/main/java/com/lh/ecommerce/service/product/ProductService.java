@@ -12,7 +12,10 @@ import com.lh.ecommerce.mapper.ProductMapper;
 import com.lh.ecommerce.repository.*;
 import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.service.image.ImageError;
+import com.lh.ecommerce.service.user.UserError;
 import com.lh.ecommerce.utils.SecurityUtils;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +32,14 @@ public class ProductService {
   private final CategoryRepository categoryRepository;
   private final ImageRepository imageRepository;
   private final UserRepository userRepository;
+  private final WishRepository wishRepository;
   private final ProductMapper productMapper;
   private final ImageMapper imageMapper;
 
   private static final int REQUIRED_IMAGES = 4;
 
   @Transactional
-  public ProductResponse create(ProductRequest request) {
+  public ProductResponse createProduct(ProductRequest request) {
     validateCategory(request.categoryId());
     validateImages(request.imageUrls());
 
@@ -46,7 +50,7 @@ public class ProductService {
   }
 
   @Transactional
-  public ProductResponse update(UUID id, ProductRequest request) {
+  public ProductResponse updateProduct(UUID id, ProductRequest request) {
     final var productEntity = validProduct(id);
     validateImages(request.imageUrls());
 
@@ -61,7 +65,7 @@ public class ProductService {
   }
 
   @Transactional
-  public void delete(UUID id) {
+  public void deleteProduct(UUID id) {
     ProductEntity product = validProduct(id);
     productRepository.delete(product);
   }
@@ -70,7 +74,7 @@ public class ProductService {
     return productRepository.findById(id).orElseThrow(ProductError.productNotFound());
   }
 
-  public PageBaseResponse<ProductBasicResponse> getAll(ProductCriteriaRequest criteria) {
+  public PageBaseResponse<ProductBasicResponse> getAllProduct(ProductCriteriaRequest criteria) {
     Page<ProductEntity> pageData =
         productRepository.search(criteria.getSearch(), criteria.getPageable());
 
@@ -84,11 +88,60 @@ public class ProductService {
     return productMapper.toResponse(product, imageUrls);
   }
 
-  public List<ProductHomeResponse> getExploreProducts() {
+  public List<ProductHomeResponse> getLatestProducts() {
     UUID userId = SecurityUtils.getCurrentUserId();
 
+    Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
     List<ProductEntity> products =
-        productRepository.getExploreProducts(userId, PageRequest.of(0, 15));
+        productRepository.getLatestProducts(userId, PageRequest.of(0, 15), threshold);
+
+    return productMapper.toProductHomeResponse(products);
+  }
+
+  // Wishlist
+  @Transactional
+  public void createWishlistItem(UUID productId) {
+    UUID userId = SecurityUtils.getCurrentUserId();
+    userRepository.findById(userId).orElseThrow(UserError.userNotFound());
+
+    if (!productRepository.existsById(productId)) {
+      throw ProductError.productNotFound().get();
+    }
+
+    if (wishRepository.existsByUserIdAndProductId(userId, productId)) {
+      throw ProductError.alreadyExistsWishListItem().get();
+    }
+
+    wishRepository.save(WishEntity.builder().userId(userId).productId(productId).build());
+  }
+
+  @Transactional
+  public void deleteWishlistItem(UUID productId) {
+    UUID userId = SecurityUtils.getCurrentUserId();
+    userRepository.findById(userId).orElseThrow(UserError.userNotFound());
+
+    if (!productRepository.existsById(productId)) {
+      throw ProductError.productNotFound().get();
+    }
+
+    int deleted = wishRepository.deleteByUserIdAndProductId(userId, productId);
+    if (deleted == 0) {
+      throw ProductError.wishNotFound().get();
+    }
+  }
+
+  public List<ProductHomeResponse> getUserWishlist() {
+    UUID userId = SecurityUtils.getCurrentUserId();
+
+    List<UUID> productIds = wishRepository.findProductIdsByUserId(userId);
+
+    if (productIds.isEmpty()) {
+      return List.of();
+    }
+
+    Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
+    List<ProductEntity> products = productRepository.findWishlistProducts(productIds, threshold);
+
     return productMapper.toProductHomeResponse(products);
   }
 

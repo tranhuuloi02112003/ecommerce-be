@@ -1,5 +1,6 @@
 package com.lh.ecommerce.service.product;
 
+import com.lh.ecommerce.exception.BadRequestException;
 import com.lh.ecommerce.exception.Error;
 import com.lh.ecommerce.exception.NotFoundException;
 import java.util.function.Supplier;
@@ -10,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ProductError implements Error {
   PRODUCT_NOTFOUND("Product not found"),
-  ;
+  WISH_NOTFOUND("The product is not in your wishlist"),
+  WISH_ALREADY_EXISTS("Wish already exists");
   private final String message;
 
   @Override
@@ -20,5 +22,13 @@ public enum ProductError implements Error {
 
   public static Supplier<NotFoundException> productNotFound() {
     return () -> new NotFoundException(PRODUCT_NOTFOUND);
+  }
+
+  public static Supplier<NotFoundException> wishNotFound() {
+    return () -> new NotFoundException(WISH_NOTFOUND);
+  }
+
+  public static Supplier<BadRequestException> alreadyExistsWishListItem() {
+    return () -> new BadRequestException(WISH_ALREADY_EXISTS);
   }
 }

@@ -5,7 +5,7 @@ import java.util.UUID;
 import lombok.*;
 
 @Entity
-@Table(name = "wishes")
+@Table(name = "wishlist")
 @Getter
 @Setter
 @NoArgsConstructor

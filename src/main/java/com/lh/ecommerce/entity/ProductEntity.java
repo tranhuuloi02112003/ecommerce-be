@@ -24,7 +24,9 @@ public class ProductEntity extends BaseAuditEntity {
 
   @Transient private CategoryEntity category;
 
-  @Transient private boolean wished;
+  @Transient private boolean isWish;
+
+  @Transient private boolean isNew;
 
   ProductEntity(ProductEntity product, ImageEntity image, CategoryEntity category) {
     super(
@@ -57,7 +59,7 @@ public class ProductEntity extends BaseAuditEntity {
     this.quantity = product.getQuantity();
   }
 
-  public ProductEntity(ProductEntity product, ImageEntity image, boolean wished) {
+  public ProductEntity(ProductEntity product, ImageEntity image, boolean isWish, boolean isNew) {
     super(
         product.getId(),
         product.getCreatedAt(),
@@ -70,6 +72,7 @@ public class ProductEntity extends BaseAuditEntity {
     this.quantity = product.getQuantity();
     this.categoryId = product.getCategoryId();
     this.mainImage = image;
-    this.wished = wished;
+    this.isWish = isWish;
+    this.isNew = isNew;
   }
 }
