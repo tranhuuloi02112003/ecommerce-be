@@ -4,6 +4,7 @@ import com.lh.ecommerce.dto.response.PageBaseResponse;
 import com.lh.ecommerce.dto.response.ProductBasicResponse;
 import com.lh.ecommerce.dto.response.ProductHomeResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
+import com.lh.ecommerce.dto.resquest.BasePageRequest;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.*;
@@ -143,6 +144,23 @@ public class ProductService {
     List<ProductEntity> products = productRepository.findWishlistProducts(productIds, threshold);
 
     return productMapper.toProductHomeResponse(products);
+  }
+
+  public PageBaseResponse<ProductHomeResponse> getProductSByCategoryId(
+      UUID categoryId, BasePageRequest pageRequest) {
+    validateCategory(categoryId);
+
+    UUID userId = SecurityUtils.getCurrentUserId();
+    Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
+
+    Page<ProductEntity> pageData =
+        productRepository.findByCategoryId(
+            categoryId, userId, pageRequest.getPageable(), threshold);
+
+    List<ProductHomeResponse> productHomeResponses =
+        productMapper.toProductHomeResponse(pageData.getContent());
+
+    return new PageBaseResponse<>(productHomeResponses, pageData);
   }
 
   private void validateCategory(UUID categoryId) {

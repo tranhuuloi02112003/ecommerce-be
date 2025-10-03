@@ -26,29 +26,45 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
   @Query(
       """
-  select new ProductEntity(
-    p, i,
-   case when w.id is not null then true else false end,
-   case when p.createdAt >= :threshold then true else false end
-  )
-  from ProductEntity p
-  join ImageEntity i on i.productId = p.id and i.isMain = true
-  left join WishEntity w on w.productId = p.id and w.userId = :userId
-  order by p.createdAt desc
-  """)
+        select new ProductEntity(
+          p, i,
+         case when w.id is not null then true else false end,
+         case when p.createdAt >= :threshold then true else false end
+        )
+        from ProductEntity p
+        join ImageEntity i on i.productId = p.id and i.isMain = true
+        left join WishEntity w on w.productId = p.id and w.userId = :userId
+        order by p.createdAt desc
+       """)
   List<ProductEntity> getLatestProducts(UUID userId, Pageable pageable, Instant threshold);
 
   @Query(
       """
-  select new com.lh.ecommerce.entity.ProductEntity(
-    p, i,
-    true,
-    case when p.createdAt >= :threshold then true else false end
-  )
-  from ProductEntity p
-  join ImageEntity i on i.productId = p.id and i.isMain = true
-  where p.id in :ids
-  order by p.createdAt desc
-""")
+        select new ProductEntity(
+          p, i,
+          true,
+          case when p.createdAt >= :threshold then true else false end
+        )
+        from ProductEntity p
+        join ImageEntity i on i.productId = p.id and i.isMain = true
+        where p.id in :ids
+        order by p.createdAt desc
+      """)
   List<ProductEntity> findWishlistProducts(List<UUID> ids, Instant threshold);
+
+  @Query(
+      """
+        select new ProductEntity(
+          p, i,
+        case when w.id is not null then true else false end,
+        case when p.createdAt >= :threshold then true else false end
+        )
+        from ProductEntity p
+        join CategoryEntity c on p.categoryId = c.id
+        join ImageEntity i on p.id = i.productId and i.isMain = true
+        left join WishEntity w on w.productId = p.id and w.userId = :userId
+        where p.categoryId = :categoryId
+      """)
+  Page<ProductEntity> findByCategoryId(
+      UUID categoryId, UUID userId, Pageable pageable, Instant threshold);
 }
