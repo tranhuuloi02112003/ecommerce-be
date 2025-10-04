@@ -92,7 +92,7 @@ public class ProductService {
   public List<ProductHomeResponse> getLatestProducts() {
     UUID userId = SecurityUtils.getCurrentUserId();
 
-     Instant threshold = DateUtils.sevenDaysAgo();
+    Instant threshold = DateUtils.sevenDaysAgo();
     List<ProductEntity> products =
         productRepository.getLatestProducts(userId, PageRequest.of(0, 15), threshold);
 
@@ -139,7 +139,7 @@ public class ProductService {
       return List.of();
     }
 
-     Instant threshold = DateUtils.sevenDaysAgo();
+    Instant threshold = DateUtils.sevenDaysAgo();
     List<ProductEntity> products = productRepository.findWishlistProducts(productIds, threshold);
 
     return productMapper.toProductHomeResponse(products);
@@ -150,7 +150,7 @@ public class ProductService {
     validateCategory(categoryId);
 
     UUID userId = SecurityUtils.getCurrentUserId();
-    Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
+    Instant threshold = DateUtils.sevenDaysAgo();
 
     Page<ProductEntity> pageData =
         productRepository.findByCategoryId(
