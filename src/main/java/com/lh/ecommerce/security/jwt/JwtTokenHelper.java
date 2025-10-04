@@ -38,7 +38,7 @@ public class JwtTokenHelper {
         .id(UUID.randomUUID().toString())
         .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_ACCESS)
         .issuedAt(new Date(System.currentTimeMillis()))
-        .expiration(DateUtils.getTime(accessMinutes))
+        .expiration(DateUtils.minutesFromNow(accessMinutes))
         .signWith(getSignInKey())
         .compact();
   }
@@ -49,7 +49,7 @@ public class JwtTokenHelper {
         .id(jti.toString())
         .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_REFRESH)
         .issuedAt(new Date(System.currentTimeMillis()))
-        .expiration(DateUtils.getTime(refreshMinutes))
+        .expiration(DateUtils.minutesFromNow(refreshMinutes))
         .signWith(getSignInKey())
         .compact();
   }

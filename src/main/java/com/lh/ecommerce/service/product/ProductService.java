@@ -14,9 +14,9 @@ import com.lh.ecommerce.repository.*;
 import com.lh.ecommerce.service.category.CategoryError;
 import com.lh.ecommerce.service.image.ImageError;
 import com.lh.ecommerce.service.user.UserError;
+import com.lh.ecommerce.utils.DateUtils;
 import com.lh.ecommerce.utils.SecurityUtils;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -92,7 +92,7 @@ public class ProductService {
   public List<ProductHomeResponse> getLatestProducts() {
     UUID userId = SecurityUtils.getCurrentUserId();
 
-    Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
+     Instant threshold = DateUtils.sevenDaysAgo();
     List<ProductEntity> products =
         productRepository.getLatestProducts(userId, PageRequest.of(0, 15), threshold);
 
@@ -103,7 +103,6 @@ public class ProductService {
   @Transactional
   public void createWishlistItem(UUID productId) {
     UUID userId = SecurityUtils.getCurrentUserId();
-    userRepository.findById(userId).orElseThrow(UserError.userNotFound());
 
     if (!productRepository.existsById(productId)) {
       throw ProductError.productNotFound().get();
@@ -140,7 +139,7 @@ public class ProductService {
       return List.of();
     }
 
-    Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
+     Instant threshold = DateUtils.sevenDaysAgo();
     List<ProductEntity> products = productRepository.findWishlistProducts(productIds, threshold);
 
     return productMapper.toProductHomeResponse(products);
@@ -151,7 +150,7 @@ public class ProductService {
     validateCategory(categoryId);
 
     UUID userId = SecurityUtils.getCurrentUserId();
-    Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
+    Instant threshold = DateUtils.sevenDaysAgo();
 
     Page<ProductEntity> pageData =
         productRepository.findByCategoryId(
