@@ -2,9 +2,9 @@ package com.lh.ecommerce.security.jwt;
 
 import com.lh.ecommerce.entity.UserEntity;
 import com.lh.ecommerce.repository.RedisRepository;
+import com.lh.ecommerce.repository.UserRepository;
 import com.lh.ecommerce.security.SecurityError;
 import com.lh.ecommerce.security.user.CustomUserPrincipal;
-import com.lh.ecommerce.service.user.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthFilter extends OncePerRequestFilter {
   private static final String BEARER_PREFIX = "Bearer ";
 
-  private final UserService userService;
+  private final UserRepository userRepository;
   private final JwtTokenHelper jwtTokenHelper;
   private final RedisRepository redisRepository;
 
@@ -48,7 +48,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     String email = jwtTokenHelper.extractEmail(token);
 
     if (email != null) {
-      UserEntity userEntity = userService.getUserByEmail(email);
+      UserEntity userEntity = userRepository.findByEmail(email).orElseThrow();
 
       CustomUserPrincipal customUserPrincipal =
           CustomUserPrincipal.builder()
