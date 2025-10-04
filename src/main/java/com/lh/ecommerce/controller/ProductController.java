@@ -23,26 +23,26 @@ public class ProductController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ProductResponse createProduct(@Valid @RequestBody ProductRequest productRequest) {
-    return productService.create(productRequest);
+    return productService.createProduct(productRequest);
   }
 
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
   public ProductResponse updateProduct(
       @PathVariable UUID id, @RequestBody ProductRequest productRequest) {
-    return productService.update(id, productRequest);
+    return productService.updateProduct(id, productRequest);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteProduct(@PathVariable UUID id) {
-    productService.delete(id);
+    productService.deleteProduct(id);
   }
 
   @GetMapping
-  public PageBaseResponse<ProductBasicResponse> getAll(
+  public PageBaseResponse<ProductBasicResponse> getAllProduct(
       @Valid @ModelAttribute ProductCriteriaRequest criteria) {
-    return productService.getAll(criteria);
+    return productService.getAllProduct(criteria);
   }
 
   @GetMapping("/{id}")
@@ -51,7 +51,25 @@ public class ProductController {
   }
 
   @GetMapping("/explore")
-  public List<ProductHomeResponse> getExploreProducts() {
-    return productService.getExploreProducts();
+  public List<ProductHomeResponse> getLatestProducts() {
+    return productService.getLatestProducts();
+  }
+
+  // Wishlist
+  @PostMapping("/{id}/wishlist")
+  @ResponseStatus(HttpStatus.CREATED)
+  public void createWishlistItem(@PathVariable UUID id) {
+    productService.createWishlistItem(id);
+  }
+
+  @DeleteMapping("/{id}/wishlist")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteWishlistItem(@PathVariable UUID id) {
+    productService.deleteWishlistItem(id);
+  }
+
+  @GetMapping("/wishlist")
+  public List<ProductHomeResponse> getUserWishlist() {
+    return productService.getUserWishlist();
   }
 }

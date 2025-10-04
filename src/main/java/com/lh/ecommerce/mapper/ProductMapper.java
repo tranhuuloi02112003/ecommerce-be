@@ -6,12 +6,8 @@ import com.lh.ecommerce.dto.response.ProductHomeResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.ProductEntity;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring")
@@ -46,20 +42,10 @@ public interface ProductMapper {
     return new PageBaseResponse<>(productBasicResponses, pageData);
   }
 
-  default List<ProductHomeResponse> toProductHomeResponse(List<ProductEntity> productEntities) {
-    final Instant threshold = Instant.now().minus(7, ChronoUnit.DAYS);
-    return productEntities.stream()
-        .map(
-            productEntity ->
-                ProductHomeResponse.builder()
-                    .id(productEntity.getId())
-                    .price(productEntity.getPrice())
-                    .name(productEntity.getName())
-                    .mainImage(productEntity.getMainImage().getUrl())
-                    .isNew(
-                        productEntity.getCreatedAt() != null
-                            && productEntity.getCreatedAt().isAfter(threshold))
-                    .build())
-        .toList();
-  }
+  @Mapping(target = "mainImage", source = "mainImage.url")
+  @Mapping(target = "isNew", source = "new")
+  @Mapping(target = "isWish", source = "wish")
+  ProductHomeResponse toProductHomeResponse(ProductEntity entity);
+
+  List<ProductHomeResponse> toProductHomeResponse(List<ProductEntity> entities);
 }
