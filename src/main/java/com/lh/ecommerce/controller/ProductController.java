@@ -56,16 +56,16 @@ public class ProductController {
   }
 
   // Wishlist
-  @PostMapping("/{productId}/wishlist")
+  @PostMapping("/{id}/wishlist")
   @ResponseStatus(HttpStatus.CREATED)
-  public void createWishlistItem(@PathVariable UUID productId) {
-    productService.createWishlistItem(productId);
+  public void createWishlistItem(@PathVariable UUID id) {
+    productService.createWishlistItem(id);
   }
 
-  @DeleteMapping("/{productId}/wishlist")
+  @DeleteMapping("/{id}/wishlist")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteWishlistItem(@PathVariable UUID productId) {
-    productService.deleteWishlistItem(productId);
+  public void deleteWishlistItem(@PathVariable UUID id) {
+    productService.deleteWishlistItem(id);
   }
 
   @GetMapping("/wishlist")
