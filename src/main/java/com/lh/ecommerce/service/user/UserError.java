@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 public enum UserError implements Error {
   USER_NOTFOUND("User not found"),
   EMAIL_ALREADY_EXISTS("Email already exists"),
+  INVALID_CURRENT_PASSWORD("Current password is incorrect"),
   ;
   private final String message;
 
@@ -26,5 +27,9 @@ public enum UserError implements Error {
 
   public static Supplier<BadRequestException> emailAlreadyExists() {
     return () -> new BadRequestException(EMAIL_ALREADY_EXISTS);
+  }
+
+  public static Supplier<BadRequestException> invalidCurrentPassword() {
+    return () -> new BadRequestException(INVALID_CURRENT_PASSWORD);
   }
 }
