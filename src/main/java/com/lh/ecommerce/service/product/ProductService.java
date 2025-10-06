@@ -4,6 +4,7 @@ import com.lh.ecommerce.dto.response.PageBaseResponse;
 import com.lh.ecommerce.dto.response.ProductBasicResponse;
 import com.lh.ecommerce.dto.response.ProductHomeResponse;
 import com.lh.ecommerce.dto.response.ProductResponse;
+import com.lh.ecommerce.dto.resquest.BasePageRequest;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
 import com.lh.ecommerce.entity.*;
@@ -91,7 +92,7 @@ public class ProductService {
   public List<ProductHomeResponse> getLatestProducts() {
     UUID userId = SecurityUtils.getCurrentUserId();
 
-     Instant threshold = DateUtils.sevenDaysAgo();
+    Instant threshold = DateUtils.sevenDaysAgo();
     List<ProductEntity> products =
         productRepository.getLatestProducts(userId, PageRequest.of(0, 15), threshold);
 
@@ -138,10 +139,27 @@ public class ProductService {
       return List.of();
     }
 
-     Instant threshold = DateUtils.sevenDaysAgo();
+    Instant threshold = DateUtils.sevenDaysAgo();
     List<ProductEntity> products = productRepository.findWishlistProducts(productIds, threshold);
 
     return productMapper.toProductHomeResponse(products);
+  }
+
+  public PageBaseResponse<ProductHomeResponse> getProductSByCategoryId(
+      UUID categoryId, BasePageRequest pageRequest) {
+    validateCategory(categoryId);
+
+    UUID userId = SecurityUtils.getCurrentUserId();
+    Instant threshold = DateUtils.sevenDaysAgo();
+
+    Page<ProductEntity> pageData =
+        productRepository.findByCategoryId(
+            categoryId, userId, pageRequest.getPageable(), threshold);
+
+    List<ProductHomeResponse> productHomeResponses =
+        productMapper.toProductHomeResponse(pageData.getContent());
+
+    return new PageBaseResponse<>(productHomeResponses, pageData);
   }
 
   private void validateCategory(UUID categoryId) {
