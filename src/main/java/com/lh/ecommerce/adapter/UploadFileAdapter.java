@@ -2,6 +2,7 @@ package com.lh.ecommerce.adapter;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,19 +37,27 @@ public class UploadFileAdapter {
     return getUrlS3(fileUpload.getOriginalFilename());
   }
 
-  private String getUrlS3(String fileName) {
+  public String getUrlS3(String fileName) {
     GetObjectRequest getObjectRequest =
         GetObjectRequest.builder().bucket(bucketName).key(fileName).build();
 
     GetObjectPresignRequest getObjectPresignRequest =
         GetObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofDays(7))
+            .signatureDuration(Duration.ofMinutes(1))
             .getObjectRequest(getObjectRequest)
             .build();
+
     return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
   }
 
+  @SneakyThrows
   public List<String> uploadMultipleFiles(List<MultipartFile> files) {
-    return files.stream().map(this::uploadFile).toList();
+    CompletableFuture<String> completableFuture = null;
+    for (MultipartFile file : files) {
+      completableFuture = CompletableFuture.supplyAsync(() -> uploadFile(file));
+      break;
+    }
+
+    return List.of(completableFuture.get());
   }
 }

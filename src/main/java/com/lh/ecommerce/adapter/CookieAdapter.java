@@ -41,13 +41,16 @@ public class CookieAdapter {
   }
 
   public String getRefreshTokenFromCookie(HttpServletRequest request) {
-    if (request.getCookies() != null) {
-      for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
-        if (REFRESH_TOKEN_NAME.equals(cookie.getName())) {
-          return cookie.getValue();
-        }
+    if (request.getCookies() == null) {
+      return null;
+    }
+
+    for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+      if (REFRESH_TOKEN_NAME.equals(cookie.getName())) {
+        return cookie.getValue();
       }
     }
+
     return null;
   }
 }
