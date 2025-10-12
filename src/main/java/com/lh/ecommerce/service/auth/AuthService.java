@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AuthService {
   private static final String BEARER_PREFIX = "Bearer ";
+
+  private final RedisTemplate<String, Object> redisTemplate;
 
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
@@ -60,6 +63,8 @@ public class AuthService {
 
     redisRepository.saveSession(session);
     cookieService.setRefreshTokenCookie(response, refreshToken);
+
+    redisTemplate.convertAndSend("pubsub:queue", session);
 
     return AccessTokenResponse.builder().accessToken(accessToken).build();
   }
