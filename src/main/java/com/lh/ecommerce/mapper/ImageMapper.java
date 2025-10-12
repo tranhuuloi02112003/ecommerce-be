@@ -8,12 +8,13 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface ImageMapper {
-  default List<ImageEntity> toEntity(List<String> urls, UUID productId) {
+
+  default List<ImageEntity> toEntity(List<String> keys, UUID productId) {
     List<ImageEntity> images = new ArrayList<>();
-    for (int i = 0; i < urls.size(); i++) {
+    for (int i = 0; i < keys.size(); i++) {
       ImageEntity image = new ImageEntity();
       image.setProductId(productId);
-      image.setUrl(urls.get(i));
+      image.setKey(keys.get(i));
       image.setMain(i == 0);
       images.add(image);
     }
