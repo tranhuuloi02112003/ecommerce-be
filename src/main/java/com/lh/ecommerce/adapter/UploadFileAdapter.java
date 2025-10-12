@@ -1,7 +1,9 @@
 package com.lh.ecommerce.adapter;
 
+import com.lh.ecommerce.dto.response.UploadFileResponse;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -25,21 +27,9 @@ public class UploadFileAdapter {
   @Value("${s3.bucket-name}")
   private String bucketName;
 
-  @SneakyThrows
-  private String uploadFile(MultipartFile fileUpload) {
-    PutObjectRequest putObjectRequest =
-        PutObjectRequest.builder().bucket(bucketName).key(fileUpload.getOriginalFilename()).build();
-
-    s3Client.putObject(
-        putObjectRequest,
-        RequestBody.fromInputStream(fileUpload.getInputStream(), fileUpload.getSize()));
-
-    return getUrlS3(fileUpload.getOriginalFilename());
-  }
-
-  public String getUrlS3(String fileName) {
+  public String getUrlS3(String valueKey) {
     GetObjectRequest getObjectRequest =
-        GetObjectRequest.builder().bucket(bucketName).key(fileName).build();
+        GetObjectRequest.builder().bucket(bucketName).key(valueKey).build();
 
     GetObjectPresignRequest getObjectPresignRequest =
         GetObjectPresignRequest.builder()
@@ -50,14 +40,47 @@ public class UploadFileAdapter {
     return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
   }
 
-  @SneakyThrows
-  public List<String> uploadMultipleFiles(List<MultipartFile> files) {
-    CompletableFuture<String> completableFuture = null;
-    for (MultipartFile file : files) {
-      completableFuture = CompletableFuture.supplyAsync(() -> uploadFile(file));
-      break;
-    }
+  public List<String> getUrlsFromKeys(List<String> keys) {
+    List<CompletableFuture<String>> futures =
+        keys.stream()
+            .map(k -> CompletableFuture.supplyAsync(() -> getUrlS3(k)).exceptionally(ex -> null))
+            .toList();
 
-    return List.of(completableFuture.get());
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+        .thenApply(v -> futures.stream().map(CompletableFuture::join).toList())
+        .join();
+  }
+
+  public List<UploadFileResponse> uploadMultipleFiles(List<MultipartFile> files) {
+    List<CompletableFuture<UploadFileResponse>> futures =
+        files.stream()
+            .map(
+                f ->
+                    CompletableFuture.supplyAsync(() -> uploadMultipleFile(f))
+                        .exceptionally(ex -> null))
+            .toList();
+
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+        .thenApply(v -> futures.stream().map(CompletableFuture::join).toList())
+        .join();
+  }
+
+  @SneakyThrows
+  public UploadFileResponse uploadMultipleFile(MultipartFile file) {
+    String key = buildKey(file);
+
+    PutObjectRequest putObjectRequest =
+        PutObjectRequest.builder().bucket(bucketName).key(key).build();
+
+    s3Client.putObject(
+        putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+    return UploadFileResponse.builder().url(getUrlS3(key)).key(key).build();
+  }
+
+  private String buildKey(MultipartFile file) {
+    String name = file.getOriginalFilename();
+    String uuid = UUID.randomUUID().toString();
+    return uuid + "-" + name;
   }
 }

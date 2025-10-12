@@ -36,7 +36,7 @@ public class UserController {
   @PutMapping("/me/avatar")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateAvatar(@Valid @RequestBody UpdateAvatarRequest request) {
-    userService.updateAvatar(request.getAvatarUrl());
+    userService.updateAvatar(request.getAvatarKey());
   }
 
   @PostMapping("/me/change-password")

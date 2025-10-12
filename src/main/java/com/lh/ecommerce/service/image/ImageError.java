@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ImageError implements Error {
   INVALID_IMAGE_COUNT("Product must have 4 images"),
-  ;
+  KEY_NOT_EMPTY("Image key must not be empty");
   private final String message;
 
   @Override
@@ -20,5 +20,9 @@ public enum ImageError implements Error {
 
   public static Supplier<BadRequestException> invalidImageCount() {
     return () -> new BadRequestException(INVALID_IMAGE_COUNT);
+  }
+
+  public static Supplier<BadRequestException> keyNotEmpty() {
+    return () -> new BadRequestException(KEY_NOT_EMPTY);
   }
 }

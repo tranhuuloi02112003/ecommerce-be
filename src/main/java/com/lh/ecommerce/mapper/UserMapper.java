@@ -1,20 +1,24 @@
 package com.lh.ecommerce.mapper;
 
+import com.lh.ecommerce.adapter.UploadFileAdapter;
 import com.lh.ecommerce.dto.response.UserResponse;
 import com.lh.ecommerce.dto.resquest.RegisterRequest;
 import com.lh.ecommerce.dto.resquest.UpdateInfoRequest;
 import com.lh.ecommerce.entity.UserEntity;
 import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = {ImageKeyUrlMapping.class})
 public interface UserMapper {
   @Mapping(target = "password", ignore = true)
   UserEntity toUserEntity(RegisterRequest request);
 
   void updateEntity(UpdateInfoRequest request, @MappingTarget UserEntity entity);
+
+  @Mapping(target = "avatarUrl", source = "avatarKey", qualifiedByName = "keyToUrl")
+  UserResponse toResponse(UserEntity entity, @Context UploadFileAdapter adapter);
 
   UserResponse toResponse(UserEntity entity);
 

@@ -20,4 +20,5 @@
    <include file="db/changelog/changeset/14-alter-carts-unique-user-product-20250921.xml"/>
    <include file="db/changelog/changeset/15-create-wishlist-table-20250925.xml"/>
    <include file="db/changelog/changeset/16-alter-users-add-address-and-avatar-url-20251003.xml"/>
+   <include file="db/changelog/changeset/17-alter-users-images-rename-avatar-url-to-key-20251011.xml"/>
 </databaseChangeLog>

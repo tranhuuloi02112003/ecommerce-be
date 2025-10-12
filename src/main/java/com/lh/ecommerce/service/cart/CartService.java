@@ -1,5 +1,6 @@
 package com.lh.ecommerce.service.cart;
 
+import com.lh.ecommerce.adapter.UploadFileAdapter;
 import com.lh.ecommerce.dto.response.CartResponse;
 import com.lh.ecommerce.dto.resquest.CartRequest;
 import com.lh.ecommerce.entity.CartEntity;
@@ -23,11 +24,12 @@ public class CartService {
   private final UserRepository userRepository;
   private final ProductRepository productRepository;
   private final CartMapper cartMapper;
+  private final UploadFileAdapter uploadFileAdapter;
 
   public List<CartResponse> findByUserId() {
     UUID userId = SecurityUtils.getCurrentUserId();
     userRepository.findById(userId).orElseThrow(UserError.userNotFound());
-    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId), uploadFileAdapter);
   }
 
   @Transactional
@@ -46,7 +48,7 @@ public class CartService {
       throw CartError.quantityExceedsStock().get();
     }
 
-    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId), uploadFileAdapter);
   }
 
   @Transactional
@@ -59,7 +61,7 @@ public class CartService {
       throw CartError.productNotInCart().get();
     }
 
-    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId));
+    return cartMapper.toCartsResponse(cartRepository.findByUserId(userId), uploadFileAdapter);
   }
 
   @Transactional
@@ -83,6 +85,6 @@ public class CartService {
                 () -> CartEntity.builder().productId(productId).userId(userId).quantity(1).build());
 
     CartEntity saved = cartRepository.save(cart);
-    return cartMapper.toCartResponse(saved);
+    return cartMapper.toCartResponse(saved, uploadFileAdapter);
   }
 }

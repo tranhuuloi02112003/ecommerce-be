@@ -10,4 +10,5 @@ public record ProductResponse(
     Double price,
     int quantity,
     UUID categoryId,
-    List<String> imageUrls) {}
+    List<String> imageUrls,
+    List<ImageResponse> images) {}

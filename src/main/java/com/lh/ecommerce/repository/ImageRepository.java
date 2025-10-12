@@ -23,10 +23,10 @@ public interface ImageRepository extends JpaRepository<ImageEntity, UUID> {
 
   @Query(
       """
-  SELECT i.url
+  SELECT i.key
   FROM ImageEntity i
   WHERE i.productId = :productId
   ORDER BY i.isMain DESC
 """)
-  List<String> findUrlsByProductId(@Param("productId") UUID productId);
+  List<String> findKeysByProductId(@Param("productId") UUID productId);
 }
