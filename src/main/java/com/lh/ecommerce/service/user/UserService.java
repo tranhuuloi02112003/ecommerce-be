@@ -1,5 +1,6 @@
 package com.lh.ecommerce.service.user;
 
+import com.lh.ecommerce.adapter.UploadFileAdapter;
 import com.lh.ecommerce.dto.response.UserResponse;
 import com.lh.ecommerce.dto.resquest.ChangePasswordRequest;
 import com.lh.ecommerce.dto.resquest.UpdateInfoRequest;
@@ -20,6 +21,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
   private final PasswordEncoder passwordEncoder;
+  private final UploadFileAdapter uploadFileAdapter;
 
   public List<UserResponse> getAllUser() {
     List<UserEntity> userEntities = userRepository.findAll();
@@ -33,7 +35,8 @@ public class UserService {
   public UserResponse getCurrentUserProfile() {
     UUID userId = SecurityUtils.getCurrentUserId();
     UserEntity userEntity = userRepository.findById(userId).orElseThrow(UserError.userNotFound());
-    return userMapper.toResponse(userEntity);
+
+    return userMapper.toResponse(userEntity, uploadFileAdapter);
   }
 
   @Transactional
@@ -58,10 +61,10 @@ public class UserService {
   }
 
   @Transactional
-  public void updateAvatar(String avatarUrl) {
+  public void updateAvatar(String avatarKey) {
     UUID userId = SecurityUtils.getCurrentUserId();
     UserEntity user = userRepository.findById(userId).orElseThrow(UserError.userNotFound());
-    user.setAvatarUrl(avatarUrl.trim());
+    user.setAvatarKey(avatarKey.trim());
     userRepository.save(user);
   }
 }

@@ -19,7 +19,8 @@ public class ImageEntity {
   @Column(name = "product_id")
   private UUID productId;
 
-  private String url;
+  @Column(name = "image_key")
+  private String key;
 
   private boolean isMain;
 }

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateAvatarRequest {
-  @Size(max = 500, message = "Avatar URL is too long")
-  @NotBlank(message = "Avatar URL is required")
-  private String avatarUrl;
+  @Size(max = 500, message = "Avatar key is too long")
+  @NotBlank(message = "Avatar is required")
+  private String avatarKey;
 }

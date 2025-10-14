@@ -16,5 +16,5 @@ public class UserEntity extends BaseAuditEntity {
   private String firstName;
   private String lastName;
   private String address;
-  private String avatarUrl;
+  private String avatarKey;
 }

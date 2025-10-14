@@ -1,9 +1,7 @@
 package com.lh.ecommerce.service.product;
 
-import com.lh.ecommerce.dto.response.PageBaseResponse;
-import com.lh.ecommerce.dto.response.ProductBasicResponse;
-import com.lh.ecommerce.dto.response.ProductHomeResponse;
-import com.lh.ecommerce.dto.response.ProductResponse;
+import com.lh.ecommerce.adapter.UploadFileAdapter;
+import com.lh.ecommerce.dto.response.*;
 import com.lh.ecommerce.dto.resquest.BasePageRequest;
 import com.lh.ecommerce.dto.resquest.ProductCriteriaRequest;
 import com.lh.ecommerce.dto.resquest.ProductRequest;
@@ -36,33 +34,34 @@ public class ProductService {
   private final WishRepository wishRepository;
   private final ProductMapper productMapper;
   private final ImageMapper imageMapper;
+  private final UploadFileAdapter uploadFileAdapter;
 
   private static final int REQUIRED_IMAGES = 4;
 
   @Transactional
   public ProductResponse createProduct(ProductRequest request) {
     validateCategory(request.categoryId());
-    validateImages(request.imageUrls());
+    validateImages(request.imageKeys());
 
     ProductEntity productEntity = productRepository.save(productMapper.toEntity(request));
-    imageRepository.saveAll(imageMapper.toEntity(request.imageUrls(), productEntity.getId()));
+    imageRepository.saveAll(imageMapper.toEntity(request.imageKeys(), productEntity.getId()));
 
-    return productMapper.toResponse(productEntity, request.imageUrls());
+    return productMapper.toResponse(productEntity, request.imageKeys(), uploadFileAdapter);
   }
 
   @Transactional
   public ProductResponse updateProduct(UUID id, ProductRequest request) {
     final var productEntity = validProduct(id);
-    validateImages(request.imageUrls());
+    validateImages(request.imageKeys());
 
     productMapper.toEntity(request, productEntity);
     ProductEntity productSaved = productRepository.save(productEntity);
 
     imageRepository.deleteByProductId(productSaved.getId());
     imageRepository.flush();
-    imageRepository.saveAll(imageMapper.toEntity(request.imageUrls(), productEntity.getId()));
+    imageRepository.saveAll(imageMapper.toEntity(request.imageKeys(), productEntity.getId()));
 
-    return productMapper.toResponse(productSaved, request.imageUrls());
+    return productMapper.toResponse(productSaved, request.imageKeys(), uploadFileAdapter);
   }
 
   @Transactional
@@ -71,22 +70,23 @@ public class ProductService {
     productRepository.delete(product);
   }
 
-  private ProductEntity validProduct(final UUID id) {
-    return productRepository.findById(id).orElseThrow(ProductError.productNotFound());
-  }
-
   public PageBaseResponse<ProductBasicResponse> getAllProduct(ProductCriteriaRequest criteria) {
     Page<ProductEntity> pageData =
         productRepository.search(criteria.getSearch(), criteria.getPageable());
 
-    return productMapper.toPageResponse(pageData);
+    return productMapper.toPageResponse(pageData, uploadFileAdapter);
   }
 
   public ProductResponse getById(UUID id) {
     ProductEntity product = validProduct(id);
 
-    List<String> imageUrls = imageRepository.findUrlsByProductId(id);
-    return productMapper.toResponse(product, imageUrls);
+    List<String> imageKeys = imageRepository.findKeysByProductId(id);
+    List<ImageResponse> imageResponses =
+        imageKeys.stream()
+            .map(key -> new ImageResponse(key, uploadFileAdapter.getUrlS3(key)))
+            .toList();
+
+    return productMapper.toResponseWithImages(product, imageResponses);
   }
 
   public List<ProductHomeResponse> getLatestProducts() {
@@ -96,7 +96,7 @@ public class ProductService {
     List<ProductEntity> products =
         productRepository.getLatestProducts(userId, PageRequest.of(0, 15), threshold);
 
-    return productMapper.toProductHomeResponse(products);
+    return productMapper.toProductHomeResponse(products, uploadFileAdapter);
   }
 
   // Wishlist
@@ -142,7 +142,7 @@ public class ProductService {
     Instant threshold = DateUtils.sevenDaysAgo();
     List<ProductEntity> products = productRepository.findWishlistProducts(productIds, threshold);
 
-    return productMapper.toProductHomeResponse(products);
+    return productMapper.toProductHomeResponse(products, uploadFileAdapter);
   }
 
   public PageBaseResponse<ProductHomeResponse> getProductSByCategoryId(
@@ -157,7 +157,7 @@ public class ProductService {
             categoryId, userId, pageRequest.getPageable(), threshold);
 
     List<ProductHomeResponse> productHomeResponses =
-        productMapper.toProductHomeResponse(pageData.getContent());
+        productMapper.toProductHomeResponse(pageData.getContent(), uploadFileAdapter);
 
     return new PageBaseResponse<>(productHomeResponses, pageData);
   }
@@ -168,9 +168,13 @@ public class ProductService {
     }
   }
 
-  private void validateImages(List<String> imageUrls) {
-    if (imageUrls.size() != REQUIRED_IMAGES) {
+  private void validateImages(List<String> imageKeys) {
+    if (imageKeys.size() != REQUIRED_IMAGES) {
       throw ImageError.invalidImageCount().get();
     }
+  }
+
+  private ProductEntity validProduct(final UUID id) {
+    return productRepository.findById(id).orElseThrow(ProductError.productNotFound());
   }
 }
