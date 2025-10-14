@@ -1,9 +1,9 @@
 package com.lh.ecommerce.adapter;
 
 import com.lh.ecommerce.dto.response.UploadFileResponse;
+import com.lh.ecommerce.utils.FileUtils;
 import java.time.Duration;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -56,7 +56,7 @@ public class UploadFileAdapter {
         files.stream()
             .map(
                 f ->
-                    CompletableFuture.supplyAsync(() -> uploadMultipleFile(f))
+                    CompletableFuture.supplyAsync(() -> uploadFile(f))
                         .exceptionally(ex -> null))
             .toList();
 
@@ -66,8 +66,8 @@ public class UploadFileAdapter {
   }
 
   @SneakyThrows
-  public UploadFileResponse uploadMultipleFile(MultipartFile file) {
-    String key = buildKey(file);
+  public UploadFileResponse uploadFile(MultipartFile file) {
+    String key = FileUtils.createNewName(file.getOriginalFilename());
 
     PutObjectRequest putObjectRequest =
         PutObjectRequest.builder().bucket(bucketName).key(key).build();
@@ -76,11 +76,5 @@ public class UploadFileAdapter {
         putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
     return UploadFileResponse.builder().url(getUrlS3(key)).key(key).build();
-  }
-
-  private String buildKey(MultipartFile file) {
-    String name = file.getOriginalFilename();
-    String uuid = UUID.randomUUID().toString();
-    return uuid + "-" + name;
   }
 }
