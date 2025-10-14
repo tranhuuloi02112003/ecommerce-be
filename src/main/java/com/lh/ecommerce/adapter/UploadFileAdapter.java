@@ -1,9 +1,9 @@
 package com.lh.ecommerce.adapter;
 
 import com.lh.ecommerce.dto.response.UploadFileResponse;
+import com.lh.ecommerce.utils.FileUtils;
 import java.time.Duration;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -51,36 +51,30 @@ public class UploadFileAdapter {
         .join();
   }
 
+  @SneakyThrows
+  public UploadFileResponse uploadFile(MultipartFile file) {
+    String key = FileUtils.createNewName(file.getOriginalFilename());
+
+    PutObjectRequest putObjectRequest =
+            PutObjectRequest.builder().bucket(bucketName).key(key).build();
+
+    s3Client.putObject(
+            putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+    return UploadFileResponse.builder().url(getUrlS3(key)).key(key).build();
+  }
+
   public List<UploadFileResponse> uploadMultipleFiles(List<MultipartFile> files) {
     List<CompletableFuture<UploadFileResponse>> futures =
         files.stream()
             .map(
                 f ->
-                    CompletableFuture.supplyAsync(() -> uploadMultipleFile(f))
+                    CompletableFuture.supplyAsync(() -> uploadFile(f))
                         .exceptionally(ex -> null))
             .toList();
 
     return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
         .thenApply(v -> futures.stream().map(CompletableFuture::join).toList())
         .join();
-  }
-
-  @SneakyThrows
-  public UploadFileResponse uploadMultipleFile(MultipartFile file) {
-    String key = buildKey(file);
-
-    PutObjectRequest putObjectRequest =
-        PutObjectRequest.builder().bucket(bucketName).key(key).build();
-
-    s3Client.putObject(
-        putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-    return UploadFileResponse.builder().url(getUrlS3(key)).key(key).build();
-  }
-
-  private String buildKey(MultipartFile file) {
-    String name = file.getOriginalFilename();
-    String uuid = UUID.randomUUID().toString();
-    return uuid + "-" + name;
   }
 }
