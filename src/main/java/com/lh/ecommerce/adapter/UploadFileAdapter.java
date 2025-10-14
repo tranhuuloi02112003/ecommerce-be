@@ -51,6 +51,19 @@ public class UploadFileAdapter {
         .join();
   }
 
+  @SneakyThrows
+  public UploadFileResponse uploadFile(MultipartFile file) {
+    String key = FileUtils.createNewName(file.getOriginalFilename());
+
+    PutObjectRequest putObjectRequest =
+            PutObjectRequest.builder().bucket(bucketName).key(key).build();
+
+    s3Client.putObject(
+            putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+    return UploadFileResponse.builder().url(getUrlS3(key)).key(key).build();
+  }
+
   public List<UploadFileResponse> uploadMultipleFiles(List<MultipartFile> files) {
     List<CompletableFuture<UploadFileResponse>> futures =
         files.stream()
@@ -63,18 +76,5 @@ public class UploadFileAdapter {
     return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
         .thenApply(v -> futures.stream().map(CompletableFuture::join).toList())
         .join();
-  }
-
-  @SneakyThrows
-  public UploadFileResponse uploadFile(MultipartFile file) {
-    String key = FileUtils.createNewName(file.getOriginalFilename());
-
-    PutObjectRequest putObjectRequest =
-        PutObjectRequest.builder().bucket(bucketName).key(key).build();
-
-    s3Client.putObject(
-        putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-    return UploadFileResponse.builder().url(getUrlS3(key)).key(key).build();
   }
 }
