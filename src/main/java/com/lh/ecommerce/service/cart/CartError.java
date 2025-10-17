@@ -22,7 +22,7 @@ public enum CartError implements Error {
     return () -> new BadRequestException(PRODUCT_NOT_IN_CART);
   }
 
-  public static java.util.function.Supplier<BadRequestException> quantityExceedsStock() {
+  public static Supplier<BadRequestException> quantityExceedsStock() {
     return () -> new BadRequestException(QUANTITY_EXCEEDS_STOCK);
   }
 }

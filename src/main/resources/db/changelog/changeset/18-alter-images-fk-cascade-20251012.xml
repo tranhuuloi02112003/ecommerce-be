@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="18" author="loith">
+        <dropForeignKeyConstraint
+                baseTableName="images"
+                constraintName="fk_images_product"/>
+
+        <addForeignKeyConstraint
+                baseTableName="images"
+                baseColumnNames="product_id"
+                referencedTableName="products"
+                referencedColumnNames="id"
+                constraintName="fk_images_product"
+                onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>
