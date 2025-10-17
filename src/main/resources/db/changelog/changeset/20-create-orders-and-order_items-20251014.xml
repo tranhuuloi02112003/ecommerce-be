@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="20" author="loith">
+        <createTable tableName="orders">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="address_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="order_status" type="varchar(20)" defaultValue="pending">
+                <constraints nullable="false"
+                             checkConstraint="order_status IN ('pending','confirmed','completed','cancelled')"/>
+            </column>
+
+            <column name="payment_status" type="varchar(20)" defaultValue="unpaid">
+                <constraints nullable="false"
+                             checkConstraint="payment_status IN ('pending','unpaid','paid','refunded')"/>
+            </column>
+
+            <column name="payment_method" type="varchar(20)">
+                <constraints nullable="false"
+                             checkConstraint="payment_method IN ('cod','bank_transfer')"/>
+            </column>
+
+            <column name="note" type="varchar(500)"/>
+
+            <column name="total_amount" type="double">
+                <constraints nullable="false" checkConstraint="total_amount &gt;= 0"/>
+            </column>
+
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="created_by" type="uuid"/>
+            <column name="updated_by" type="uuid"/>
+        </createTable>
+
+        <createTable tableName="order_items">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="order_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="price" type="double">
+                <constraints nullable="false" checkConstraint="price &gt;= 0"/>
+            </column>
+
+            <column name="quantity" type="int" defaultValueNumeric="1">
+                <constraints nullable="false" checkConstraint="quantity &gt;= 1"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="orders"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"
+                constraintName="fk_orders_user"/>
+
+        <addForeignKeyConstraint
+                baseTableName="orders"
+                baseColumnNames="address_id"
+                referencedTableName="addresses"
+                referencedColumnNames="id"
+                constraintName="fk_orders_address"/>
+
+        <addForeignKeyConstraint
+                baseTableName="orders"
+                baseColumnNames="created_by"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_orders_created_by"/>
+
+        <addForeignKeyConstraint
+                baseTableName="orders"
+                baseColumnNames="updated_by"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_orders_updated_by"/>
+
+        <addForeignKeyConstraint
+                baseTableName="order_items"
+                baseColumnNames="order_id"
+                referencedTableName="orders"
+                referencedColumnNames="id"
+                onDelete="CASCADE"
+                constraintName="fk_order_items_order"/>
+
+        <addForeignKeyConstraint
+                baseTableName="order_items"
+                baseColumnNames="product_id"
+                referencedTableName="products"
+                referencedColumnNames="id"
+                constraintName="fk_order_items_product"/>
+    </changeSet>
+</databaseChangeLog>
