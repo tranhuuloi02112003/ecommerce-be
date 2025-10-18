@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 public enum ProductError implements Error {
   PRODUCT_NOTFOUND("Product not found"),
   WISH_NOTFOUND("The product is not in your wishlist"),
-  WISH_ALREADY_EXISTS("Wish already exists");
+  WISH_ALREADY_EXISTS("Wish already exists"),
+  PRODUCT_NOT_FOUND_IN_LIST("One or more products not found");
+  ;
   private final String message;
 
   @Override
@@ -30,5 +32,9 @@ public enum ProductError implements Error {
 
   public static Supplier<BadRequestException> alreadyExistsWishListItem() {
     return () -> new BadRequestException(WISH_ALREADY_EXISTS);
+  }
+
+  public static Supplier<BadRequestException> productNotFoundInList() {
+    return () -> new BadRequestException(PRODUCT_NOT_FOUND_IN_LIST);
   }
 }

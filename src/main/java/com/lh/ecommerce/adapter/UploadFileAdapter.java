@@ -56,10 +56,10 @@ public class UploadFileAdapter {
     String key = FileUtils.createNewName(file.getOriginalFilename());
 
     PutObjectRequest putObjectRequest =
-            PutObjectRequest.builder().bucket(bucketName).key(key).build();
+        PutObjectRequest.builder().bucket(bucketName).key(key).build();
 
     s3Client.putObject(
-            putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
     return UploadFileResponse.builder().url(getUrlS3(key)).key(key).build();
   }
@@ -67,10 +67,7 @@ public class UploadFileAdapter {
   public List<UploadFileResponse> uploadMultipleFiles(List<MultipartFile> files) {
     List<CompletableFuture<UploadFileResponse>> futures =
         files.stream()
-            .map(
-                f ->
-                    CompletableFuture.supplyAsync(() -> uploadFile(f))
-                        .exceptionally(ex -> null))
+            .map(f -> CompletableFuture.supplyAsync(() -> uploadFile(f)).exceptionally(ex -> null))
             .toList();
 
     return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
