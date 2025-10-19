@@ -24,4 +24,5 @@
    <include file="db/changelog/changeset/18-alter-images-fk-cascade-20251012.xml"/>
    <include file="db/changelog/changeset/19-create-addresses-table-20251013.xml"/>
    <include file="db/changelog/changeset/20-create-orders-and-order_items-20251014.xml"/>
+   <include file="db/changelog/changeset/21-alter-users-add-verification-and-enabled-20251018.xml"/>
 </databaseChangeLog>

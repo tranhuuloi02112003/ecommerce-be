@@ -1,6 +1,7 @@
 package com.lh.ecommerce.service.auth;
 
 import com.lh.ecommerce.adapter.CookieAdapter;
+import com.lh.ecommerce.adapter.NotificationAdapter;
 import com.lh.ecommerce.dto.response.AccessTokenResponse;
 import com.lh.ecommerce.dto.response.Session;
 import com.lh.ecommerce.dto.response.UserResponse;
@@ -38,6 +39,7 @@ public class AuthService {
   private final UserRepository userRepository;
   private final CookieAdapter cookieService;
   private final UserMapper userMapper;
+  private final NotificationAdapter notificationAdapter;
 
   @Transactional
   public AccessTokenResponse login(LoginRequest request, HttpServletResponse response) {
@@ -106,9 +108,31 @@ public class AuthService {
     UserEntity user = userMapper.toUserEntity(request);
     user.setPassword(passwordEncoder.encode(request.getPassword()));
 
+    String verificationCode = UUID.randomUUID().toString();
+    user.setVerificationCode(verificationCode);
+
     UserEntity saved = userRepository.save(user);
 
+    String fullName = request.getFirstName() + " " + request.getLastName();
+    notificationAdapter.sendVerificationEmail(saved.getEmail(), verificationCode, fullName);
+
     return userMapper.toResponse(saved);
+  }
+
+  @Transactional
+  public void verifyEmail(String token) {
+    UserEntity user =
+        userRepository
+            .findByVerificationCode(token)
+            .orElseThrow(UserError.invalidVerificationToken());
+
+    if (user.isEnabled()) {
+      throw UserError.accountAlreadyVerified().get();
+    }
+
+    user.setEnabled(true);
+    user.setVerificationCode(null);
+    userRepository.save(user);
   }
 
   private void validateRefreshToken(String email, String jtiRefreshToken) {
