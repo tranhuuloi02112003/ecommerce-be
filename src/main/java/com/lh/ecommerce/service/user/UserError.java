@@ -13,6 +13,8 @@ public enum UserError implements Error {
   USER_NOTFOUND("User not found"),
   EMAIL_ALREADY_EXISTS("Email already exists"),
   INVALID_CURRENT_PASSWORD("Current password is incorrect"),
+  INVALID_VERIFICATION_TOKEN("Invalid or expired verification token"),
+  ACCOUNT_ALREADY_VERIFIED("Account is already verified"),
   ;
   private final String message;
 
@@ -31,5 +33,13 @@ public enum UserError implements Error {
 
   public static Supplier<BadRequestException> invalidCurrentPassword() {
     return () -> new BadRequestException(INVALID_CURRENT_PASSWORD);
+  }
+
+  public static Supplier<NotFoundException> invalidVerificationToken() {
+    return () -> new NotFoundException(INVALID_VERIFICATION_TOKEN);
+  }
+
+  public static Supplier<BadRequestException> accountAlreadyVerified() {
+    return () -> new BadRequestException(ACCOUNT_ALREADY_VERIFIED);
   }
 }

@@ -27,6 +27,7 @@ public class SecurityConfig {
     "/api/auth/logout",
     "/api/auth/refresh-token",
     "/api/auth/register",
+    "/api/auth/verify-email",
     "/api/products/explore"
   };
 

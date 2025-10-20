@@ -1,3 +1,12 @@
+server:
+  port: 8081
+
+client:
+  keycloak:
+    client-id: demo-keycloak
+    client-secret: PtIaITiCZwkkwbrSdeD77bNURVxEzhFc
+    base-url: http://localhost:8080
+
 spring:
   application:
     name: ecommerce-be
@@ -24,3 +33,7 @@ spring:
     secret-key: a89c31e68731757d7100da93c2e301b36ee46383f8f951784bae6817ae8fa6c5d04882
     access-minutes: 15
     refresh-minutes: 43200
+
+email:
+  service:
+    base-url: http://localhost:8082
