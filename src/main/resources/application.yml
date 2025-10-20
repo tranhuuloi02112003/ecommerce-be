@@ -1,3 +1,12 @@
+server:
+  port: 8081
+
+client:
+  keycloak:
+    client-id: demo-keycloak
+    client-secret: PtIaITiCZwkkwbrSdeD77bNURVxEzhFc
+    base-url: http://localhost:8080
+
 spring:
   application:
     name: ecommerce-be
@@ -27,6 +36,4 @@ spring:
 
 email:
   service:
-    url: http://localhost:8081/api/emails
-server:
-  port: 8081
+    base-url: http://localhost:8082
