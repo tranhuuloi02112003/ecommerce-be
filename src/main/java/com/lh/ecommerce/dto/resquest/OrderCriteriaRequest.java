@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
@@ -23,7 +24,7 @@ public class OrderCriteriaRequest extends BasePageRequest {
   private LocalDate endDate;
 
   public String getSearch() {
-    return search != null ? search.trim() : "";
+    return StringUtils.trimToEmpty(search);
   }
 
   public Instant getStartDate() {

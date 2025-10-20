@@ -2,8 +2,10 @@ package com.lh.ecommerce.mapper;
 
 import com.lh.ecommerce.dto.response.OrderResponse;
 import com.lh.ecommerce.dto.response.PageBaseResponse;
+import com.lh.ecommerce.dto.resquest.OrderRequest;
 import com.lh.ecommerce.entity.OrderEntity;
 import java.util.List;
+import java.util.UUID;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
@@ -22,4 +24,9 @@ public interface OrderMapper {
         pageData.getContent().stream().map(this::toResponse).toList();
     return new PageBaseResponse<>(orderResponses, pageData);
   }
+
+  @Mapping(target = "paymentStatus", constant = "PENDING")
+  @Mapping(target = "orderStatus", constant = "PENDING")
+  @Mapping(target = "userId", expression = "java(userId)")
+  OrderEntity toEntity(OrderRequest request, UUID userId);
 }

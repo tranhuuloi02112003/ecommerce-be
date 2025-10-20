@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -67,4 +68,13 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
       """)
   Page<ProductEntity> findByCategoryId(
       UUID categoryId, UUID userId, Pageable pageable, Instant threshold);
+
+  @Modifying
+  @Query(
+      """
+        update ProductEntity
+        set quantity = quantity - :quantity
+        where id = :productId and quantity >= :quantity
+        """)
+  int decreaseQuantity(UUID productId, int quantity);
 }
